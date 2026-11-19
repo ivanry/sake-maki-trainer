@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="theme-color" id="tc" content="#3a6ea5">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Сяке-Маки тренажер</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Onest:wght@400..700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --desk:#3a6ea5; --face:#d4d0c8; --hi:#ffffff; --lite:#e8e6e0; --shade:#808080; --dark:#404040;
+  --text:#000000; --field:#ffffff; --fieldtext:#000000; --muted:#555555;
+  --t1:#0a246a; --t2:#a6caf0; --tt:#ffffff; --sel:#0a246a; --seltext:#ffffff;
+  --ok:#1d7a2a; --okbg:#d9f2d6; --bad:#b3261e; --badbg:#fbdcd8;
+  --paper:#fffdf2; --rule:#b9d3ee; --margin:#e7908e; --ink:#1b2a6b;
+  --b0:#c8c4bc; --b1:#e2574c; --b2:#f0a030; --b3:#e6d03a; --b4:#7cc35a; --b5:#2f8f3a;
+  --ui:Tahoma, Verdana, "Segoe UI", Geneva, sans-serif;
+  --hand:"Patrick Hand", "Comic Sans MS", "Chalkboard SE", cursive;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --desk:#14283f; --face:#3b3a37; --hi:#6a6862; --lite:#4a4945; --shade:#232220; --dark:#121211;
+    --text:#ecebe6; --field:#262523; --fieldtext:#f0efea; --muted:#b5b3ac;
+    --t1:#1c3a7a; --t2:#3f6aa8; --sel:#3d63b0;
+    --ok:#7fd88a; --okbg:#1f3a22; --bad:#ff8f84; --badbg:#46201d;
+    --paper:#ece6d2; --rule:#a9c2db; --margin:#d98a88; --ink:#1b2a6b; --b0:#5a5853;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --desk:#14283f; --face:#3b3a37; --hi:#6a6862; --lite:#4a4945; --shade:#232220; --dark:#121211;
+  --text:#ecebe6; --field:#262523; --fieldtext:#f0efea; --muted:#b5b3ac;
+  --t1:#1c3a7a; --t2:#3f6aa8; --sel:#3d63b0;
+  --ok:#7fd88a; --okbg:#1f3a22; --bad:#ff8f84; --badbg:#46201d;
+  --paper:#ece6d2; --rule:#a9c2db; --margin:#d98a88; --ink:#1b2a6b; --b0:#5a5853;
+}
+*{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;margin:0;background:var(--desk);color:var(--text);font:13px/1.4 var(--ui);overflow:hidden}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--desk)}
+button,input,select{font:inherit;color:inherit}
+.raised{background:var(--face);box-shadow:inset -1px -1px var(--dark),inset 1px 1px var(--hi),inset -2px -2px var(--shade),inset 2px 2px var(--lite)}
+.sunken{background:var(--field);color:var(--fieldtext);box-shadow:inset 1px 1px var(--shade),inset -1px -1px var(--hi),inset 2px 2px var(--dark),inset -2px -2px var(--lite)}
+.wrap{height:100%;padding:18px;display:flex;justify-content:center}
+.win{width:100%;max-width:1120px;height:100%;display:flex;flex-direction:column;padding:3px}
+.titlebar{display:flex;align-items:center;gap:6px;padding:3px 3px 3px 6px;background:linear-gradient(90deg,var(--t1),var(--t2));color:var(--tt);font-weight:bold;user-select:none}
+.titlebar .ico{width:16px;height:16px;display:grid;place-items:center;background:#f7d64a;color:#0a246a;font-size:11px;border:1px solid #7a5d00;line-height:1}
+.titlebar .name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbtn{width:18px;height:16px;padding:0;border:0;font-size:10px;line-height:1;color:var(--text);cursor:pointer}
+.toolbar{display:flex;gap:2px;padding:4px;align-items:stretch;overflow-x:auto;border-bottom:1px solid var(--shade)}
+.tool{min-width:66px;border:0;background:transparent;padding:4px 6px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;color:var(--text)}
+.tool .g{font-size:20px;line-height:22px}
+.tool:hover{box-shadow:inset -1px -1px var(--shade),inset 1px 1px var(--hi)}
+.tool[aria-pressed="true"]{box-shadow:inset 1px 1px var(--shade),inset -1px -1px var(--hi);background:var(--lite)}
+.sep{width:2px;margin:2px 6px;box-shadow:inset 1px 0 var(--shade),inset -1px 0 var(--hi);flex:0 0 2px}
+.opts{display:flex;flex-direction:column;justify-content:center;gap:3px;padding:0 4px;white-space:nowrap}
+.opts label{display:flex;align-items:center;gap:6px;justify-content:space-between}
+select{background:var(--field);color:var(--fieldtext);border:0;padding:2px 4px;box-shadow:inset 1px 1px var(--shade),inset -1px -1px var(--hi),inset 2px 2px var(--dark)}
+.main{flex:1;display:flex;gap:4px;padding:4px;min-height:0}
+.pane-left{width:250px;flex:0 0 250px;display:flex;flex-direction:column;min-height:0}
+.coursepick{display:flex;flex-direction:column;gap:3px;margin:0 0 8px 2px;font-weight:bold;font-size:12px}
+.coursepick select{font-weight:normal;width:100%}
+.pane-left h2,.groupt{font-size:12px;font-weight:bold;margin:0 0 3px 2px}
+.tree{flex:1;overflow:auto;padding:4px 2px}
+.tree ul{list-style:none;margin:0;padding:0}
+.tree li ul{padding-left:18px}
+.node{display:flex;align-items:center;gap:4px;padding:1px 2px;white-space:nowrap}
+.node label{display:flex;align-items:center;gap:4px;cursor:pointer;flex:1;min-width:0}
+.node .lbl{overflow:hidden;text-overflow:ellipsis}
+.node .cnt{color:var(--muted);font-size:11px}
+.exp{width:11px;height:11px;border:1px solid var(--shade);background:var(--field);color:var(--fieldtext);font-size:10px;line-height:8px;padding:0;cursor:pointer;flex:0 0 11px}
+.treebtns{display:flex;gap:4px;margin-top:4px}
+.btn{border:0;padding:4px 12px;min-height:25px;cursor:pointer;color:var(--text)}
+.btn:active:not(:disabled){box-shadow:inset 1px 1px var(--dark),inset -1px -1px var(--hi),inset 2px 2px var(--shade)}
+.btn:disabled{color:var(--shade);cursor:default}
+.btn.default{outline:1px solid var(--dark)}
+:focus-visible{outline:1px dotted var(--text);outline-offset:-4px}
+.btn.default:focus-visible{outline:1px dotted var(--text)}
+.pane-right{flex:1;min-width:0;display:flex;flex-direction:column;min-height:0}
+.view{flex:1;overflow:auto;padding:14px}
+.status{display:flex;gap:2px;padding:2px}
+.status span{padding:1px 6px;box-shadow:inset 1px 1px var(--shade),inset -1px -1px var(--hi);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.status span:first-child{flex:1}
+
+/* browse */
+.searchrow{display:flex;gap:8px;align-items:center;margin-bottom:8px;flex-wrap:wrap}
+.searchrow input{flex:1;min-width:160px;border:0;padding:4px 6px;background:var(--field);color:var(--fieldtext);box-shadow:inset 1px 1px var(--shade),inset -1px -1px var(--hi),inset 2px 2px var(--dark)}
+.tablewrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;background:var(--field);color:var(--fieldtext)}
+th{background:var(--face);color:var(--text);text-align:left;font-weight:normal;padding:3px 6px;box-shadow:inset -1px -1px var(--shade),inset 1px 1px var(--hi);position:sticky;top:-14px}
+td{padding:3px 6px;border-bottom:1px solid var(--lite);vertical-align:top}
+tr.unit td{background:var(--lite);color:var(--text);font-weight:bold}
+.boxes{display:inline-flex;gap:2px;vertical-align:middle}
+.boxes i{width:8px;height:8px;border:1px solid var(--shade);background:var(--field)}
+.card .boxes i{background:transparent;border-color:#9a9a9a}
+.card .boxes i.on{background:#4f9a3e;border-color:#2f6d24}
+.boxes i.on{background:var(--b4);border-color:var(--ok)}
+.spk{border:0;background:none;cursor:pointer;padding:0 4px;font-size:14px;color:inherit}
+
+/* card */
+.stage{max-width:620px;margin:0 auto}
+.prog{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.bar{flex:1;height:18px;padding:2px}
+.bar b{display:block;height:100%;background:repeating-linear-gradient(90deg,var(--sel) 0 9px,transparent 9px 11px);transition:width .25s}
+.card{position:relative;background:var(--paper);color:var(--ink);min-height:250px;padding:34px 24px 22px 64px;
+  background-image:linear-gradient(90deg,transparent 46px,var(--margin) 46px,var(--margin) 48px,transparent 48px),
+  repeating-linear-gradient(var(--paper) 0 33px,var(--rule) 33px 34px);
+  box-shadow:2px 3px 0 var(--shade);border:1px solid var(--shade)}
+.card .where{position:absolute;top:8px;left:64px;right:12px;font:11px var(--ui);color:#6b6b6b;display:flex;justify-content:space-between}
+.card .q{font:40px/1.1 var(--hand);margin:18px 0 6px;word-break:break-word}
+.card .a{font:32px/1.1 var(--hand);color:#b3261e;margin-top:14px;min-height:36px;word-break:break-word}
+.card .a.hidden{color:transparent;text-shadow:none}
+.card .langtag{font:11px var(--ui);color:#6b6b6b}
+.card .spk{position:absolute;right:10px;bottom:10px;font-size:18px;color:#1b2a6b}
+.flipin{animation:flip .28s ease-out}
+@keyframes flip{from{transform:rotateX(70deg);opacity:.3}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion: reduce){.flipin{animation:none}.bar b{transition:none}}
+.actions{display:flex;gap:8px;justify-content:center;margin-top:16px;flex-wrap:wrap}
+.actions .btn{min-width:130px}
+.kbd{font-size:11px;color:var(--muted);text-align:center;margin-top:8px}
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.choice{border:0;text-align:left;padding:10px 12px;cursor:pointer;color:var(--text);display:flex;gap:8px;align-items:baseline}
+.choice .n{font-size:11px;color:var(--muted)}
+.choice.right{background:var(--okbg);color:var(--ok);font-weight:bold}
+.choice.wrong{background:var(--badbg);color:var(--bad)}
+.answer{display:flex;gap:8px;margin-top:14px}
+.answer input{flex:1;font-size:18px;padding:6px 8px;border:0;background:var(--field);color:var(--fieldtext);box-shadow:inset 1px 1px var(--shade),inset -1px -1px var(--hi),inset 2px 2px var(--dark);min-width:0}
+.feedback{margin-top:10px;padding:8px 10px;min-height:38px}
+.feedback.ok{background:var(--okbg);color:var(--ok)}
+.feedback.bad{background:var(--badbg);color:var(--bad)}
+.dialog{max-width:460px;margin:30px auto;padding:3px}
+.dialog .titlebar{margin-bottom:0}
+.dialog .body{padding:16px}
+.dialog .body p{margin:0 0 10px}
+.big{font-size:28px;font-weight:bold}
+
+/* stats */
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+.statgrid div{padding:8px 10px}
+.statgrid b{display:block;font-size:22px}
+.urow{display:grid;grid-template-columns:150px 1fr 48px;gap:8px;align-items:center;margin:6px 0}
+.stack{display:flex;height:18px;padding:2px}
+.stack span{height:100%}
+.legend{display:flex;gap:10px;flex-wrap:wrap;font-size:11px;margin:8px 0 14px}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:4px;vertical-align:-1px;border:1px solid var(--shade)}
+.hint{color:var(--muted)}
+.empty{text-align:center;padding:40px 10px}
+.mobilecol{display:none}
+
+@media (max-width:760px){
+  .wrap{padding:0}
+  .win{max-width:none}
+  .main{flex-direction:column}
+  .pane-left{width:auto;flex:0 0 auto}
+  .pane-left .tree{max-height:34vh}
+  .pane-left.closed .tree,.pane-left.closed .treebtns{display:none}
+  .mobilecol{display:inline-block}
+  .choices{grid-template-columns:1fr}
+  .card{padding:30px 14px 18px 56px}
+  .card .where{left:56px}
+  .card .q{font-size:32px}
+  .tbtn{display:none}
+  .toolbar{flex-wrap:wrap}
+  .toolbar .sep{display:none}
+  .opts{flex-direction:row;flex-wrap:wrap;gap:6px 12px;padding:4px}
+  .view{padding:10px}
+  .urow{grid-template-columns:100px 1fr 40px}
+  .status span:nth-child(3){display:none}
+}
+</style>
+<style>@media (max-width:760px){.deskonly{display:none}}
+/* ===== Modern theme ===== */
+.uitoggle{height:16px;padding:0 8px;border:0;font:11px var(--ui);color:var(--text);cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.uitoggle .sw{display:none}
+:root[data-ui="modern"]{
+  --m-bg:#ECEEF3; --m-surface:#FFFFFF; --m-sunk:#F3F4F8; --m-line:#DDE1EA; --m-ink:#16213E; --m-muted:#5B6478;
+  --m-pri:#2F5BEA; --m-prink:#FFFFFF; --m-hl:#FFE45C; --m-hlink:#16213E;
+  --m-ok:#12805C; --m-okbg:#E2F4EB; --m-bad:#C2412D; --m-badbg:#FBE8E4;
+  --m-shadow:0 1px 2px rgba(22,33,62,.06),0 22px 44px -26px rgba(22,33,62,.32);
+  --ui:"Onest", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --disp:"Bricolage Grotesque", "Onest", "Segoe UI", system-ui, sans-serif;
+  --b0:#DDE1EA; --b1:#F08A7A; --b2:#F5B556; --b3:#F2DA4E; --b4:#73C79B; --b5:#12805C;
+}
+@media (prefers-color-scheme: dark){
+  :root[data-ui="modern"]:not([data-theme="light"]){
+    --m-bg:#0D121D; --m-surface:#151C2B; --m-sunk:#1B2334; --m-line:#29334A; --m-ink:#E8ECF5; --m-muted:#9AA4BA;
+    --m-pri:#86A2FF; --m-prink:#0D121D; --m-ok:#5FD3A2; --m-okbg:#12322A; --m-bad:#FF8C76; --m-badbg:#3A1E1A;
+    --m-shadow:0 1px 2px rgba(0,0,0,.3),0 24px 48px -28px rgba(0,0,0,.7); --b0:#29334A;
+  }
+}
+:root[data-ui="modern"][data-theme="dark"]{
+  --m-bg:#0D121D; --m-surface:#151C2B; --m-sunk:#1B2334; --m-line:#29334A; --m-ink:#E8ECF5; --m-muted:#9AA4BA;
+  --m-pri:#86A2FF; --m-prink:#0D121D; --m-ok:#5FD3A2; --m-okbg:#12322A; --m-bad:#FF8C76; --m-badbg:#3A1E1A;
+  --m-shadow:0 1px 2px rgba(0,0,0,.3),0 24px 48px -28px rgba(0,0,0,.7); --b0:#29334A;
+}
+:root[data-ui="modern"] body{background:var(--m-bg);color:var(--m-ink);font:14px/1.5 var(--ui);-webkit-font-smoothing:antialiased}
+:root[data-ui="modern"] body::before{background:var(--m-bg)}
+:root[data-ui="modern"] :focus-visible{outline:2px solid var(--m-pri);outline-offset:2px}
+:root[data-ui="modern"] .wrap{padding:20px 24px}
+:root[data-ui="modern"] .win.raised{background:transparent;box-shadow:none}
+:root[data-ui="modern"] .win{background:transparent;box-shadow:none;padding:0;max-width:1240px;gap:12px}
+:root[data-ui="modern"] .raised,:root[data-ui="modern"] .sunken{box-shadow:none;background:var(--m-surface);color:var(--m-ink)}
+/* header */
+:root[data-ui="modern"] .titlebar{background:none;color:var(--m-ink);padding:2px 2px 0;gap:10px;font-weight:600}
+:root[data-ui="modern"] .titlebar .ico{width:32px;height:32px;border:0;border-radius:9px;background:var(--m-hl);color:var(--m-hlink);font:800 13px var(--disp);letter-spacing:-.02em}
+:root[data-ui="modern"] .titlebar .name{font:650 19px/1.2 var(--disp);letter-spacing:-.015em}
+:root[data-ui="modern"] .tbtn{display:none}
+:root[data-ui="modern"] .uitoggle{height:auto;padding:7px 12px 7px 8px;border:1px solid var(--m-line);border-radius:999px;background:var(--m-surface);color:var(--m-ink);font:500 13px var(--ui);gap:8px}
+:root[data-ui="modern"] .uitoggle .sw{display:inline-block;position:relative;width:30px;height:18px;border-radius:999px;background:var(--m-pri)}
+:root[data-ui="modern"] .uitoggle .sw::after{content:"";position:absolute;top:2px;left:14px;width:14px;height:14px;border-radius:50%;background:var(--m-prink)}
+/* toolbar */
+:root[data-ui="modern"] .toolbar{background:var(--m-surface);border:1px solid var(--m-line);border-radius:16px;padding:6px;gap:4px;align-items:center;flex-wrap:wrap;overflow:visible;row-gap:6px}
+:root[data-ui="modern"] .urow{grid-template-columns:200px 1fr 48px}
+:root[data-ui="modern"] .tool{flex-direction:row;min-width:0;flex-shrink:0;padding:9px 14px;border-radius:11px;color:var(--m-muted);font-weight:550;gap:6px;white-space:nowrap}
+:root[data-ui="modern"] .tool .g{display:none}
+:root[data-ui="modern"] .tool:hover{box-shadow:none;background:var(--m-sunk);color:var(--m-ink)}
+:root[data-ui="modern"] .tool[aria-pressed="true"]{box-shadow:none;background:var(--m-hl);color:var(--m-hlink);font-weight:650}
+:root[data-ui="modern"] .sep{width:1px;flex:0 0 1px;height:26px;align-self:center;box-shadow:none;background:var(--m-line);margin:0 8px}
+:root[data-ui="modern"] .opts{flex-direction:row;align-items:center;gap:14px;color:var(--m-muted);font-size:13px}
+:root[data-ui="modern"] select{background:var(--m-sunk);color:var(--m-ink);border:1px solid var(--m-line);border-radius:9px;padding:6px 8px;box-shadow:none;font-size:13px}
+:root[data-ui="modern"] input[type="checkbox"]{accent-color:var(--m-pri);width:16px;height:16px}
+/* panes */
+:root[data-ui="modern"] .main{padding:0;gap:12px}
+:root[data-ui="modern"] .pane-left{background:var(--m-surface);border:1px solid var(--m-line);border-radius:20px;padding:16px 12px 12px;width:268px;flex-basis:268px}
+:root[data-ui="modern"] .coursepick,:root[data-ui="modern"] .pane-left h2,:root[data-ui="modern"] .groupt{font:600 13px var(--ui);color:var(--m-muted);margin-left:4px}
+:root[data-ui="modern"] .coursepick select{font-weight:550;padding:9px 10px}
+:root[data-ui="modern"] .groupt{color:var(--m-ink);font:650 16px var(--disp);margin:18px 0 8px}
+:root[data-ui="modern"] .tree{background:transparent;padding:0}
+:root[data-ui="modern"] .node{padding:6px;border-radius:9px;gap:6px}
+:root[data-ui="modern"] .node:hover{background:var(--m-sunk)}
+:root[data-ui="modern"] .exp{border:0;background:transparent;color:var(--m-muted);width:18px;height:18px;flex-basis:18px;font-size:14px;line-height:18px;border-radius:5px}
+:root[data-ui="modern"] .exp:hover{background:var(--m-line)}
+:root[data-ui="modern"] .node .cnt{color:var(--m-muted);font-size:12px;margin-left:auto}
+:root[data-ui="modern"] .view{background:var(--m-surface);border:1px solid var(--m-line);border-radius:20px;padding:28px}
+:root[data-ui="modern"] .status{padding:0 4px;gap:16px}
+:root[data-ui="modern"] .status span{box-shadow:none;padding:0;color:var(--m-muted);font-size:12px}
+/* buttons */
+:root[data-ui="modern"] .btn{background:var(--m-sunk);color:var(--m-ink);border:1px solid var(--m-line);border-radius:12px;padding:9px 18px;min-height:42px;font-weight:600;box-shadow:none;outline:0;transition:background .15s,border-color .15s}
+:root[data-ui="modern"] .btn:hover:not(:disabled){border-color:var(--m-muted)}
+:root[data-ui="modern"] .btn:active:not(:disabled){box-shadow:none;transform:translateY(1px)}
+:root[data-ui="modern"] .btn.default{background:var(--m-pri);color:var(--m-prink);border-color:var(--m-pri)}
+:root[data-ui="modern"] .btn:disabled{opacity:.45;color:var(--m-ink)}
+:root[data-ui="modern"] .treebtns .btn{flex:1;min-height:36px;padding:6px 10px;font-size:13px}
+:root[data-ui="modern"] #no{background:var(--m-badbg);color:var(--m-bad);border-color:transparent}
+/* list */
+:root[data-ui="modern"] .searchrow input{background:var(--m-sunk);color:var(--m-ink);border:1px solid var(--m-line);border-radius:12px;padding:11px 14px;box-shadow:none;font-size:15px}
+:root[data-ui="modern"] .hint{color:var(--m-muted)}
+:root[data-ui="modern"] table{background:transparent;color:var(--m-ink)}
+:root[data-ui="modern"] th{background:var(--m-surface);color:var(--m-muted);box-shadow:inset 0 -1px var(--m-line);font-weight:600;font-size:12px;padding:10px 8px;top:-28px}
+:root[data-ui="modern"] td{border-bottom:1px solid var(--m-line);padding:10px 8px}
+:root[data-ui="modern"] tr.unit td{background:transparent;color:var(--m-ink);font:650 16px var(--disp);padding-top:22px}
+:root[data-ui="modern"] .boxes{gap:3px}
+:root[data-ui="modern"] .boxes i,:root[data-ui="modern"] .card .boxes i{width:12px;height:5px;border:0;border-radius:3px;background:var(--m-line)}
+:root[data-ui="modern"] .boxes i.on,:root[data-ui="modern"] .card .boxes i.on{background:var(--m-ok)}
+:root[data-ui="modern"] .spk{color:var(--m-muted)}
+/* practice */
+:root[data-ui="modern"] .stage{max-width:680px}
+:root[data-ui="modern"] .prog{gap:12px;color:var(--m-muted);font-size:13px;margin-bottom:18px}
+:root[data-ui="modern"] .bar{height:6px;padding:0;background:var(--m-sunk);border-radius:999px;overflow:hidden}
+:root[data-ui="modern"] .bar b{background:var(--m-pri);border-radius:999px}
+:root[data-ui="modern"] .card{background:var(--m-surface);background-image:none;color:var(--m-ink);border:1px solid var(--m-line);border-radius:28px;box-shadow:var(--m-shadow);padding:60px 36px 40px;min-height:300px;text-align:center}
+:root[data-ui="modern"] .card .where{top:18px;left:24px;right:24px;color:var(--m-muted);font:500 12px var(--ui)}
+:root[data-ui="modern"] .card .langtag{color:var(--m-muted);font:500 12px var(--ui);letter-spacing:.02em}
+:root[data-ui="modern"] .card .q{font:700 clamp(34px,6vw,56px)/1.05 var(--disp);letter-spacing:-.025em;margin:10px 0 26px;color:var(--m-ink)}
+:root[data-ui="modern"] .card .a{display:inline-block;font:600 clamp(26px,4.4vw,38px)/1.15 var(--disp);letter-spacing:-.015em;color:var(--m-ink);margin-top:8px;padding:0 .12em;background:linear-gradient(transparent 66%,var(--m-hl) 66%,var(--m-hl) 92%,transparent 92%)}
+:root[data-ui="modern"] .card .a.hidden{background:none;color:var(--m-muted);border:2px dashed var(--m-line);border-radius:14px;min-width:140px;font-size:24px;padding:6px 18px}
+:root[data-ui="modern"] .card .spk{right:16px;bottom:16px;width:40px;height:40px;border-radius:50%;background:var(--m-sunk);font-size:16px;color:var(--m-ink)}
+:root[data-ui="modern"] .actions{margin-top:22px;gap:10px}
+:root[data-ui="modern"] .actions .btn{min-width:170px;min-height:48px}
+:root[data-ui="modern"] .kbd{color:var(--m-muted);font-size:12px;margin-top:12px}
+:root[data-ui="modern"] .choices{gap:10px;margin-top:20px}
+:root[data-ui="modern"] .choice{background:var(--m-surface);color:var(--m-ink);border:1px solid var(--m-line);border-radius:14px;padding:14px 16px;font-size:16px;font-weight:500;align-items:center;gap:12px;box-shadow:none}
+:root[data-ui="modern"] .choice:hover:not(:disabled){border-color:var(--m-pri)}
+:root[data-ui="modern"] .choice .n{flex:0 0 24px;height:24px;display:grid;place-items:center;border-radius:7px;background:var(--m-sunk);color:var(--m-muted);font-weight:600}
+:root[data-ui="modern"] .choice.right{background:var(--m-okbg);color:var(--m-ok);border-color:var(--m-ok)}
+:root[data-ui="modern"] .choice.wrong{background:var(--m-badbg);color:var(--m-bad);border-color:var(--m-bad)}
+:root[data-ui="modern"] .answer{margin-top:20px;gap:10px}
+:root[data-ui="modern"] .answer input{background:var(--m-sunk);color:var(--m-ink);border:2px solid var(--m-line);border-radius:14px;padding:12px 16px;font-size:20px;box-shadow:none}
+:root[data-ui="modern"] .answer input:focus{border-color:var(--m-pri);outline:0}
+:root[data-ui="modern"] .feedback{border-radius:14px;padding:12px 16px;margin-top:12px}
+:root[data-ui="modern"] .feedback.ok{background:var(--m-okbg);color:var(--m-ok)}
+:root[data-ui="modern"] .feedback.bad{background:var(--m-badbg);color:var(--m-bad)}
+:root[data-ui="modern"] .dialog{border:1px solid var(--m-line);border-radius:24px;box-shadow:var(--m-shadow);padding:8px}
+:root[data-ui="modern"] .dialog .titlebar{padding:16px 16px 0}
+:root[data-ui="modern"] .dialog .titlebar .name{font-size:18px;color:var(--m-muted);font-weight:600}
+:root[data-ui="modern"] .big{font:700 34px/1.15 var(--disp);letter-spacing:-.02em}
+/* stats */
+:root[data-ui="modern"] .statgrid{gap:10px}
+:root[data-ui="modern"] .statgrid div{background:var(--m-sunk);border-radius:16px;padding:14px 16px;color:var(--m-muted);font-size:13px}
+:root[data-ui="modern"] .statgrid b{font:700 30px/1.2 var(--disp);color:var(--m-ink);letter-spacing:-.02em}
+:root[data-ui="modern"] .stack{height:10px;padding:0;background:var(--m-sunk);border-radius:999px;overflow:hidden}
+:root[data-ui="modern"] .legend i{border:0;border-radius:3px}
+@media (max-width:760px){
+  :root[data-ui="modern"] .wrap{padding:10px}
+  :root[data-ui="modern"] body{overflow:auto}
+  :root[data-ui="modern"] .wrap,:root[data-ui="modern"] .win{height:auto;min-height:100%}
+  :root[data-ui="modern"] .main,:root[data-ui="modern"] .pane-right{min-height:0;flex:none}
+  :root[data-ui="modern"] .view{overflow:visible;flex:none}
+  :root[data-ui="modern"] .opts label{justify-content:flex-start}
+  :root[data-ui="modern"] .toolbar{overflow:visible}
+  :root[data-ui="modern"] .pane-left{width:auto;flex-basis:auto}
+  :root[data-ui="modern"] .opts{flex-wrap:wrap}
+  :root[data-ui="modern"] .view{padding:16px}
+  :root[data-ui="modern"] th{top:-16px}
+  :root[data-ui="modern"] .card{padding:52px 18px 32px}
+  :root[data-ui="modern"] .uitoggle .lab{font-size:12px}
+}
+@media (prefers-reduced-motion: reduce){:root[data-ui="modern"] .btn{transition:none}}
+.card.long .q{font-size:27px;line-height:1.2}
+.card.long .a{font-size:23px;line-height:1.2}
+:root[data-ui="modern"] .card.long .q{font-size:clamp(20px,2.6vw,28px);line-height:1.25;letter-spacing:-.01em}
+:root[data-ui="modern"] .card.long .a{font-size:clamp(18px,2.2vw,22px);line-height:1.35;display:inline;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+:root[data-ui="modern"] .card.long .a.hidden{display:inline-block}
+/* ===== header controls ===== */
+.titlebar .ico.logo,:root[data-ui="modern"] .titlebar .ico.logo{background:none;border:0;padding:0;display:block;flex:0 0 auto}
+.titlebar .ico.logo{width:18px;height:18px}
+:root[data-ui="modern"] .titlebar .ico.logo{width:34px;height:34px;filter:drop-shadow(0 2px 3px rgba(22,33,62,.25))}
+.vh{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.titlebar .ctrls{display:flex;align-items:center;gap:4px;flex:0 0 auto}
+.hsel select{font:11px var(--ui);height:18px;padding:0 2px;box-shadow:inset 1px 1px var(--shade),inset -1px -1px var(--hi)}
+:root[data-ui="modern"] .titlebar .ctrls{gap:8px}
+:root[data-ui="modern"] .hsel select{height:auto;font:500 13px var(--ui);padding:7px 10px;border-radius:999px;background:var(--m-surface);border:1px solid var(--m-line);color:var(--m-ink)}
+:root[data-ui="modern"][data-theme="dark"]{color-scheme:dark}
+:root[data-ui="modern"][data-theme="light"]{color-scheme:light}
+
+/* ===== language colour coding ===== */
+:root{--en-ink:#1f3fa8;--de-ink:#9a5406}
+:root[data-ui="modern"]{--en-bg:#EEF2FF;--en-line:#C9D3FB;--en-ink:#3446B8;--de-bg:#FFF5E6;--de-line:#F0D2A0;--de-ink:#9A5406}
+@media (prefers-color-scheme: dark){:root[data-ui="modern"]:not([data-theme="light"]){--en-bg:#18203A;--en-line:#2E3C6E;--en-ink:#A9B8FF;--de-bg:#2A2114;--de-line:#5A4422;--de-ink:#F3B867}}
+:root[data-ui="modern"][data-theme="dark"]{--en-bg:#18203A;--en-line:#2E3C6E;--en-ink:#A9B8FF;--de-bg:#2A2114;--de-line:#5A4422;--de-ink:#F3B867}
+.card .lang-en .langtag{color:var(--en-ink)}
+.card .lang-de .langtag{color:var(--de-ink)}
+th.c-en{color:var(--en-ink)} th.c-de{color:var(--de-ink)}
+:root[data-ui="modern"] .card{padding:44px 14px 14px}
+:root[data-ui="modern"] .card .zone{border-radius:18px;padding:16px 18px 22px;border:1px solid transparent}
+:root[data-ui="modern"] .card .zone + .zone{margin-top:10px}
+:root[data-ui="modern"] .card .zq{position:relative;padding-top:18px}
+:root[data-ui="modern"] .card .lang-en{background:var(--en-bg);border-color:var(--en-line)}
+:root[data-ui="modern"] .card .lang-de{background:var(--de-bg);border-color:var(--de-line)}
+:root[data-ui="modern"] .card .langtag{font-weight:650;display:inline-flex;align-items:center;gap:6px}
+:root[data-ui="modern"] .card .langtag::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+:root[data-ui="modern"] .card .q{margin:8px 0 4px}
+:root[data-ui="modern"] .card .spk{top:10px;right:10px;bottom:auto;background:var(--m-surface)}
+:root[data-ui="modern"] .card .lang-en .a.hidden{border-color:var(--en-line);background:var(--m-surface)}
+:root[data-ui="modern"] .card .lang-de .a.hidden{border-color:var(--de-line);background:var(--m-surface)}
+:root[data-ui="modern"] .choices.lang-en .choice .n{background:var(--en-bg);color:var(--en-ink)}
+:root[data-ui="modern"] .choices.lang-de .choice .n{background:var(--de-bg);color:var(--de-ink)}
+:root[data-ui="modern"] .choices.lang-en .choice:hover:not(:disabled){border-color:var(--en-ink)}
+:root[data-ui="modern"] .choices.lang-de .choice:hover:not(:disabled){border-color:var(--de-ink)}
+:root[data-ui="modern"] .choice.right .n,:root[data-ui="modern"] .choice.wrong .n{background:var(--m-surface);color:inherit}
+:root[data-ui="modern"] .answer.lang-en input{border-color:var(--en-line)}
+:root[data-ui="modern"] .answer.lang-de input{border-color:var(--de-line)}
+:root[data-ui="modern"] .answer input:focus{border-color:var(--m-pri)}
+
+/* ===== touch devices & iPhone / iPad ===== */
+:root{--wp:18px}
+:root[data-ui="modern"]{--wp:24px}
+@media (max-width:760px){:root{--wp:0px} :root[data-ui="modern"]{--wp:10px}}
+.wrap{padding-left:max(var(--wp),env(safe-area-inset-left,0px)) !important;padding-right:max(var(--wp),env(safe-area-inset-right,0px)) !important}
+button,select,input,label{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+@media (max-width:760px), (pointer:coarse){
+  body,:root[data-ui="modern"] body{overflow:auto;-webkit-text-size-adjust:100%}
+  .wrap,.win,:root[data-ui="modern"] .wrap,:root[data-ui="modern"] .win{height:auto;min-height:100%}
+  .main,:root[data-ui="modern"] .main{flex:1 0 auto;align-items:stretch}
+  .pane-right,:root[data-ui="modern"] .pane-right{flex:1 1 0;min-width:0;min-height:0;display:flex;flex-direction:column}
+  .view,:root[data-ui="modern"] .view{overflow:visible;flex:1 0 auto}
+  th,:root[data-ui="modern"] th{position:static}
+  .tree{flex:none}
+}
+@media (max-width:760px){
+  .main,:root[data-ui="modern"] .main{align-items:stretch}
+}
+@media (pointer:coarse){
+  select,input[type="search"],.answer input,:root[data-ui="modern"] select,:root[data-ui="modern"] .hsel select,:root[data-ui="modern"] .searchrow input{font-size:16px}
+  .kbd{display:none}
+  .tool,:root[data-ui="modern"] .tool{min-height:44px}
+  .node{min-height:40px}
+  input[type="checkbox"],:root[data-ui="modern"] input[type="checkbox"]{width:20px;height:20px}
+  .btn{min-height:44px}
+  .spk{min-width:44px;min-height:44px}
+  :root[data-ui="modern"] .card .spk{width:44px;height:44px}
+}
+@media (max-width:560px){
+  .titlebar{flex-wrap:wrap;row-gap:6px}
+  .titlebar .name{flex:1 1 calc(100% - 48px)}
+  .titlebar .ctrls{flex:1 1 100%;justify-content:flex-end}
+  .opts label{gap:8px}
+  .choice{padding:12px}
+  :root[data-ui="modern"] .card{padding:40px 10px 10px;border-radius:22px}
+  :root[data-ui="modern"] .card .zone{padding:14px 12px 18px}
+  :root[data-ui="modern"] .actions .btn{flex:1 1 0;min-width:0}
+  :root[data-ui="modern"] .urow{grid-template-columns:1fr 44px}
+  :root[data-ui="modern"] .urow .stack{grid-column:1 / -1;grid-row:2}
+  .urow{grid-template-columns:1fr 44px}
+  .urow .stack{grid-column:1 / -1;grid-row:2}
+  .card .where span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding-right:8px}
+}
+/* Russian colour */
+:root{--ru-ink:#6b2fa8}
+:root[data-ui="modern"]{--ru-bg:#F5EFFF;--ru-line:#DCCBF7;--ru-ink:#6A3DB8}
+@media (prefers-color-scheme: dark){:root[data-ui="modern"]:not([data-theme="light"]){--ru-bg:#231A36;--ru-line:#45336B;--ru-ink:#C9AEFF}}
+:root[data-ui="modern"][data-theme="dark"]{--ru-bg:#231A36;--ru-line:#45336B;--ru-ink:#C9AEFF}
+.card .lang-ru .langtag{color:var(--ru-ink)}
+th.c-ru{color:var(--ru-ink)}
+:root[data-ui="modern"] .card .lang-ru{background:var(--ru-bg);border-color:var(--ru-line)}
+:root[data-ui="modern"] .card .lang-ru .a.hidden{border-color:var(--ru-line);background:var(--m-surface)}
+:root[data-ui="modern"] .choices.lang-ru .choice .n{background:var(--ru-bg);color:var(--ru-ink)}
+:root[data-ui="modern"] .choices.lang-ru .choice:hover:not(:disabled){border-color:var(--ru-ink)}
+:root[data-ui="modern"] .answer.lang-ru input{border-color:var(--ru-line)}
+:root[data-ui="modern"] .card .langtag{display:flex;justify-content:center}
+:root[data-ui="modern"] .card .lang-en .langtag{color:var(--en-ink)}
+:root[data-ui="modern"] .card .lang-de .langtag{color:var(--de-ink)}
+:root[data-ui="modern"] .card .lang-ru .langtag{color:var(--ru-ink)}
+:root[data-ui="modern"] .card{min-height:0}
+.card .zq .q{padding-right:30px}
+:root[data-ui="modern"] .card .zq .q{padding:0 44px}
+@media (max-width:560px){:root[data-ui="modern"] .card .zq .q{padding:0 34px}}
+html.kb-open[data-view="write"] .card.long .q,:root[data-ui="modern"].kb-open[data-view="write"] .card.long .q{font-size:18px;line-height:1.25}
+html.kb-open[data-view="write"] .card.long .a,:root[data-ui="modern"].kb-open[data-view="write"] .card.long .a{font-size:17px}
+:root:not([data-ui]) .win{display:flex;flex-direction:column}
+@media (max-width:760px), (pointer:coarse){:root:not([data-ui]) .main{flex:1 0 auto}}
+@media (max-width:760px), (pointer:coarse){
+  :root .main,:root[data-ui="modern"] .main{flex:1 0 auto;min-height:0}
+  :root .pane-right,:root[data-ui="modern"] .pane-right{flex:1 1 auto;min-height:0}
+}
+@media (max-width:760px){
+  :root .pane-right,:root[data-ui="modern"] .pane-right{flex:none}
+}
+
+/* ===== layout polish ===== */
+.tabs,.settings{display:flex;align-items:stretch;gap:2px}
+.settings{flex:0 0 auto}
+#wintitle .sub::before{content:" – "}
+.coursepick label{font-weight:inherit}
+.courselist{display:none}
+.citem{display:block;width:100%;text-align:left;border:0;background:transparent;color:inherit;font:inherit;cursor:pointer;padding:3px 6px}
+.citem .ctop{display:block;font-size:11px;opacity:.75}
+.citem .cmain{display:block}
+.citem[aria-checked="true"]{background:var(--sel);color:var(--seltext)}
+@media (min-width:761px){
+  .coursepick select{display:none}
+  .courselist{display:block;padding:2px}
+  .courselist.sunken{}
+}
+.courselist{background:var(--field);color:var(--fieldtext);box-shadow:inset 1px 1px var(--shade),inset -1px -1px var(--hi),inset 2px 2px var(--dark),inset -2px -2px var(--lite)}
+:root[data-ui="modern"] .courselist{background:transparent;box-shadow:none;padding:0;display:none}
+@media (min-width:761px){:root[data-ui="modern"] .courselist{display:flex;flex-direction:column;gap:4px}}
+:root[data-ui="modern"] .citem{padding:9px 12px;border-radius:12px;border:1px solid transparent;line-height:1.3}
+:root[data-ui="modern"] .citem:hover{background:var(--m-sunk)}
+:root[data-ui="modern"] .citem .ctop{font-size:12px;color:var(--m-muted);opacity:1;margin-bottom:1px}
+:root[data-ui="modern"] .citem .cmain{font-weight:550}
+:root[data-ui="modern"] .citem[aria-checked="true"]{background:var(--m-sunk);border-color:var(--m-line);color:var(--m-ink);box-shadow:inset 3px 0 0 var(--m-pri)}
+:root[data-ui="modern"] .coursepick{gap:8px;margin:0 0 18px}
+:root[data-ui="modern"] .coursepick > label{margin-left:4px}
+/* sidebar: topic buttons right under the list, no stretched gap */
+:root[data-ui="modern"] .pane-left .tree{flex:0 1 auto;min-height:0;overflow:auto}
+:root[data-ui="modern"] .treebtns{margin-top:12px;gap:8px}
+:root[data-ui="modern"] .pane-left h2{margin:0 0 6px 4px}
+/* modern toolbar: tabs row + settings row */
+:root[data-ui="modern"] .toolbar{flex-direction:column;align-items:stretch;gap:0;padding:6px;flex-wrap:nowrap}
+:root[data-ui="modern"] .tabs{flex-wrap:wrap;gap:4px}
+:root[data-ui="modern"] .settings{flex-wrap:wrap;align-items:center;gap:10px 28px;margin-top:6px;padding:10px 8px 4px;border-top:1px solid var(--m-line)}
+:root[data-ui="modern"] .settings .sep{display:none}
+:root[data-ui="modern"] .settings .opts{padding:0;gap:10px 28px;flex-wrap:wrap}
+:root[data-ui="modern"] .settings .opts label{gap:10px}
+:root[data-ui="modern"] .settings input[type="checkbox"]{margin:0}
+/* header: app name + course as subtitle */
+:root[data-ui="modern"] #wintitle .app{font-weight:700}
+:root[data-ui="modern"] #wintitle .sub{font-weight:500;color:var(--m-muted)}
+:root[data-ui="modern"] #wintitle .sub::before{content:"";display:inline-block;width:1px;height:.9em;background:var(--m-line);margin:0 12px;vertical-align:-1px}
+/* stats */
+:root[data-ui="modern"] .statgrid{gap:12px;margin-bottom:24px}
+:root[data-ui="modern"] .urow{margin:10px 0;gap:16px}
+:root[data-ui="modern"] .legend{margin:12px 0 16px;gap:16px}
+:root[data-ui="modern"] .groupt{margin:28px 0 12px}
+:root[data-ui="modern"] .statgrid + .groupt{margin-top:0}
+:root[data-ui="modern"] .urow > span:last-child{text-align:right;font-variant-numeric:tabular-nums;color:var(--m-muted)}
+:root[data-ui="modern"] td{vertical-align:middle}
+@media (max-width:760px){
+  :root[data-ui="modern"] .settings{gap:10px 20px}
+  :root[data-ui="modern"] .settings .opts label{justify-content:flex-start}
+}
+/* tree labels wrap instead of being cut off */
+.node{white-space:normal;align-items:flex-start}
+.node label{align-items:flex-start}
+.node .lbl{overflow:visible;text-overflow:clip;white-space:normal;line-height:1.35}
+.node input[type="checkbox"]{margin-top:2px;flex:0 0 auto}
+.node .exp{margin-top:2px}
+:root[data-ui="modern"] .node .exp{margin-top:0}
+.node .cnt{white-space:nowrap}
+.citem{font-weight:normal}
+/* tables: even language columns, compact level/action columns */
+.tablewrap table{table-layout:fixed;min-width:560px}
+.tablewrap th:last-child{width:84px}
+.tablewrap table:has(th:nth-child(5)) th:nth-child(4){width:96px}
+.tablewrap table:has(th:nth-child(5)) th:last-child{width:52px}
+.tablewrap td{overflow-wrap:anywhere}
+/* stat cards: 4 across, 2×2 when the practice area is narrow */
+.view{container-type:inline-size}
+.statgrid{grid-template-columns:repeat(4,minmax(0,1fr))}
+@container (max-width:620px){.statgrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@container (max-width:560px){
+  .urow,:root[data-ui="modern"] .urow{grid-template-columns:1fr 44px;row-gap:6px;margin:12px 0}
+  .urow .stack,:root[data-ui="modern"] .urow .stack{grid-column:1 / -1;grid-row:2}
+}
+@container (min-width:561px){:root[data-ui="modern"] .urow{grid-template-columns:minmax(150px,38%) 1fr 48px}}
+@media (max-width:760px){
+  :root[data-ui="modern"] .settings{flex-direction:column;align-items:stretch;gap:10px}
+  :root[data-ui="modern"] .settings .opts{flex-direction:column;align-items:stretch;gap:10px}
+  :root[data-ui="modern"] .settings .opts label{display:flex;justify-content:space-between;align-items:center;width:100%;gap:12px}
+  :root[data-ui="modern"] .settings select{max-width:62%;flex:0 1 auto}
+  :root[data-ui="modern"] .legend{gap:8px 14px}
+}
+@media (max-width:900px){
+  #wintitle .sub{display:none}
+}
+/* tap to continue, overrides */
+.tapnext{text-align:center;margin:8px 0 0;font-size:12px}
+#override{margin-left:8px;min-height:32px}
+input.locked{opacity:.75}
+.zq{position:relative}
+/* hardware keyboard detected: show shortcut hints even on touch devices */
+html.has-kb .kbd{display:block}
+/* on-screen keyboard open while typing: keep card + field in the visible area */
+html.kb-open[data-view="write"] .titlebar,
+html.kb-open[data-view="write"] .toolbar,
+html.kb-open[data-view="write"] .pane-left,
+html.kb-open[data-view="write"] .status,
+html.kb-open[data-view="write"] .kbd,
+html.kb-open[data-view="write"] .card .where,
+html.kb-open[data-view="write"] .prog{display:none}
+html.kb-open[data-view="write"] .wrap{padding-top:6px;padding-bottom:6px}
+html.kb-open[data-view="write"] .view{padding:8px}
+html.kb-open[data-view="write"] .card,
+:root[data-ui="modern"].kb-open[data-view="write"] .card{min-height:0;padding:10px;box-shadow:none}
+html.kb-open[data-view="write"] .card .q,
+:root[data-ui="modern"].kb-open[data-view="write"] .card .q{font-size:24px;margin:4px 0}
+html.kb-open[data-view="write"] .card .a,
+:root[data-ui="modern"].kb-open[data-view="write"] .card .a{font-size:20px;margin-top:2px}
+:root[data-ui="modern"].kb-open[data-view="write"] .card .zone{padding:10px 12px 12px}
+html.kb-open[data-view="write"] .answer{margin-top:8px}
+html.kb-open[data-view="write"] .feedback{margin-top:6px;padding:8px 12px;min-height:0}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="win raised" role="application" aria-label="Сяке-Маки тренажер">
+  <div class="titlebar">
+    <span class="ico logo" aria-hidden="true"><svg viewBox="0 0 64 64" width="100%" height="100%"><circle cx="32" cy="32" r="31" fill="#1c2a22"/><circle cx="32" cy="32" r="31" fill="none" stroke="#2f4637" stroke-width="2" stroke-dasharray="6 9"/><circle cx="32" cy="32" r="25" fill="#fbf8f1"/><g fill="#e6dfcf"><ellipse cx="18" cy="24" rx="3" ry="1.6" transform="rotate(-30 18 24)"/><ellipse cx="46" cy="21" rx="3" ry="1.6" transform="rotate(25 46 21)"/><ellipse cx="47" cy="43" rx="3" ry="1.6" transform="rotate(-20 47 43)"/><ellipse cx="19" cy="43" rx="3" ry="1.6" transform="rotate(35 19 43)"/><ellipse cx="32" cy="14" rx="3" ry="1.6"/><ellipse cx="32" cy="51" rx="3" ry="1.6"/></g><path d="M20.5 31c1-8 9-12.5 16-10.5 7 2 10.5 9 8.5 15.5-2 7-10 10.5-17 8.5-6-2-8.5-7.5-7.5-13.5z" fill="#f26a35"/><g fill="none" stroke="#ffd3b9" stroke-width="2.2" stroke-linecap="round"><path d="M25 26c4 2 8 6 9 11"/><path d="M31 22.5c4 2.5 7.5 7 8 12"/><path d="M23 34c3 1.5 5.5 4 6.5 7.5"/></g></svg></span>
+    <span class="name" id="wintitle">Сяке-Маки тренажер</span>
+    <div class="ctrls">
+      <label class="hsel"><span class="vh" data-i18n="language">Language</span><select id="lang">
+        <option value="en">English</option><option value="de">Deutsch</option><option value="ru">Русский</option>
+      </select></label>
+      <label class="hsel"><span class="vh" data-i18n="theme">Theme</span><select id="theme">
+        <option value="classic" data-i18n="th_classic">Classic</option>
+        <option value="light" data-i18n="th_light">Modern light</option>
+        <option value="dark" data-i18n="th_dark">Modern dark</option>
+      </select></label>
+      <button class="tbtn raised" tabindex="-1" aria-hidden="true">_</button>
+      <button class="tbtn raised" tabindex="-1" aria-hidden="true">□</button>
+      <button class="tbtn raised" tabindex="-1" aria-hidden="true">×</button>
+    </div>
+  </div>
+  <div class="toolbar" role="toolbar" data-i18n-aria="modes" aria-label="Modes">
+    <div class="tabs">
+    <button class="tool" data-view="browse"><span class="g" aria-hidden="true">📖</span><span data-i18n="nav_browse">Word list</span></button>
+    <button class="tool" data-view="learn"><span class="g" aria-hidden="true">🗂️</span><span data-i18n="nav_learn">Flashcards</span></button>
+    <button class="tool" data-view="quiz"><span class="g" aria-hidden="true">☑️</span><span data-i18n="nav_quiz">Choice test</span></button>
+    <button class="tool" data-view="write"><span class="g" aria-hidden="true">✏️</span><span data-i18n="nav_write">Write test</span></button>
+    <button class="tool" data-view="stats"><span class="g" aria-hidden="true">📊</span><span data-i18n="nav_stats">Statistics</span></button>
+    </div>
+    <div class="settings">
+    <span class="sep" aria-hidden="true"></span>
+    <div class="opts">
+      <label><span data-i18n="direction">Direction</span> <select id="dir">
+        <option value="en-de" data-i18n="dir_en-de">English → German</option>
+        <option value="de-en" data-i18n="dir_de-en">German → English</option>
+        <option value="mix" data-i18n="dir_mix">Mixed</option>
+      </select></label>
+      <label><span data-i18n="perRound">Words per round</span> <select id="size">
+        <option value="10">10</option><option value="20">20</option><option value="30">30</option><option value="0" data-i18n="allSel">All selected</option>
+      </select></label>
+    </div>
+    <span class="sep" aria-hidden="true"></span>
+    <div class="opts">
+      <label><span data-i18n="readWords">Read words aloud</span><input type="checkbox" id="autospeak"></label>
+      <label><span data-i18n="weakFirst">Weakest words first</span><input type="checkbox" id="weak" checked></label>
+    </div>
+    </div>
+  </div>
+  <div class="main">
+    <div class="pane-left closed" id="left">
+      <div class="coursepick"><label for="course" data-i18n="course">Course</label><select id="course"></select><div class="courselist" id="courselist" role="radiogroup" data-i18n-aria="course" aria-label="Course"></div></div>
+      <h2><button class="btn raised mobilecol" id="treetoggle" aria-expanded="false"><span data-i18n="topics">Topics</span> ▾</button><span class="deskonly" data-i18n="topics">Topics</span></h2>
+      <div class="tree sunken" id="tree"></div>
+      <div class="treebtns">
+        <button class="btn raised" id="all" data-i18n="selectAll">Select all</button>
+        <button class="btn raised" id="none" data-i18n="clear">Clear</button>
+      </div>
+    </div>
+    <div class="pane-right">
+      <div class="view sunken" id="view" tabindex="-1"></div>
+    </div>
+  </div>
+  <div class="status" aria-live="polite">
+    <span id="st1"></span><span id="st2"></span><span id="st3"></span>
+  </div>
+</div>
+</div>
+<script>
+const COURSES = {
+  more1: { name: 'P’s collection: More! 1: English for German speakers', title: 'P’s collection: More! 1 Vocabulary', target: 'en', unit: 'Unit', prefix: '', data: [{"n":1,"t":"Time for school","s":[{"t":"Basic words & phrases","w":[["a","ein/e","неопределённый артикль"],["the","der/die/das (bestimmter Artikel)","определённый артикль"],["and","und","и"],["yes","ja","да"],["not","nicht","не"],["I","ich","я"],["you","du; ihr; Sie","ты; вы"],["please","bitte","пожалуйста"],["thank you","danke","спасибо"],["to say","sagen","говорить; сказать"],["to sing","singen","петь"],["boy","Junge","мальчик"],["girl","Mädchen","девочка"],["school","Schule","школа"],["apple","Apfel","яблоко"],["ball","Ball","мяч"],["cat","Katze","кошка"],["dog","Hund","собака"],["bear","Bär","медведь"],["fish","Fisch","рыба"],["frog","Frosch","лягушка"],["crocodile","Krokodil","крокодил"],["gorilla","Gorilla","горилла"],["insect","Insekt","насекомое"],["honey","Honig","мёд"],["T-shirt","T-Shirt","футболка"],["Hello!","Hallo!","Привет!"],["Bye!","Tschüss!","Пока!"],["What's your name?","Wie heißt du?","Как тебя зовут?"],["My name is John.","Ich heiße John.","Меня зовут Джон."],["I'm Joanna.","Ich bin Joanna.","Я Джоанна."],["I'm sorry.","Es tut mir leid.","Мне жаль. / Извини."]]},{"t":"Numbers 1–25","w":[["one","1","один"],["two","2","два"],["three","3","три"],["four","4","четыре"],["five","5","пять"],["six","6","шесть"],["seven","7","семь"],["eight","8","восемь"],["nine","9","девять"],["ten","10","десять"],["eleven","11","одиннадцать"],["twelve","12","двенадцать"],["thirteen","13","тринадцать"],["fourteen","14","четырнадцать"],["fifteen","15","пятнадцать"],["sixteen","16","шестнадцать"],["seventeen","17","семнадцать"],["eighteen","18","восемнадцать"],["nineteen","19","девятнадцать"],["twenty","20","двадцать"],["twenty-one","21","двадцать один"],["twenty-two","22","двадцать два"],["twenty-three","23","двадцать три"],["twenty-four","24","двадцать четыре"],["twenty-five","25","двадцать пять"]]},{"t":"Colours","w":[["red","rot","красный"],["yellow","gelb","жёлтый"],["blue","blau","синий"],["green","grün","зелёный"],["orange","orange","оранжевый"],["brown","braun","коричневый"],["pink","rosa","розовый"],["white","weiß","белый"],["black","schwarz","чёрный"],["grey","grau","серый"]]},{"t":"In the classroom","w":[["door","Tür","дверь"],["sound system","Soundsystem / Lautsprecheranlage","звуковая система"],["board","Tafel","доска"],["projector","Projektor","проектор"],["window","Fenster","окно"],["desk","Schultisch","парта"],["scissors","Schere","ножницы"],["ruler","Lineal","линейка"],["floor","Boden","пол"],["tablet","Tablet","планшет"],["pencil case","Federpennal / Federmäppchen","пенал"],["chair","Sessel / Stuhl","стул"],["watercolours","Wasserfarben","акварельные краски"],["paintbrush","Pinsel","кисточка"],["school bag","Schultasche","школьная сумка; ранец"],["pen","Kugelschreiber / Stift","ручка"],["exercise book","Heft","тетрадь"],["glue stick","Klebestift","клей-карандаш"],["pencil","Bleistift","карандаш"],["pencil sharpener","Spitzer","точилка"],["rubber","Radiergummi","ластик"]]},{"t":"Cool clothes","w":[["hairband","Haarband","ободок для волос"],["sunglasses","Sonnenbrille","солнечные очки"],["shirt","Hemd","рубашка"],["hat","Hut","шляпа"],["school tie","Schulkrawatte","школьный галстук"],["sweater","Pullover","свитер"],["skirt","Rock","юбка"],["socks","Socken","носки"],["shoe","Schuh","ботинок; туфля"]]},{"t":"More Words and Phrases","w":[["to give","geben","давать"],["time","Zeit","время"],["to understand","verstehen","понимать"],["to write","schreiben","писать"],["to enjoy","genießen","наслаждаться"],["to listen","zuhören","слушать"],["to love","lieben","любить"],["more","mehr","больше"],["to read","lesen","читать"],["their","ihr/e","их"],["to ask","fragen","спрашивать"],["(email) address","(E-Mail-)Adresse","(электронный) адрес"],["How are you?","Wie geht es dir/Ihnen/euch?","Как дела?"],["I am (I’m) fine.","Es geht mir gut.","У меня всё хорошо."],["to meet","kennenlernen; sich treffen","знакомиться; встречаться"],["then","dann; danach","потом; затем"],["your","dein/e; Ihr/e; euer/eure","твой; ваш"],["to look","sehen; schauen","смотреть"],["or","oder","или"],["to eat","essen; fressen","есть"],["to go","gehen","идти"],["must","müssen","должен"],["how many","wie viele","сколько"],["to hate","hassen; nicht ausstehen können","ненавидеть"],["here","hier","здесь"],["it","es","это; оно"],["Let’s …","Lasst (uns) …","Давай(те) …"],["midnight","Mitternacht","полночь"],["our","unser/e","наш"],["favourite","Lieblings-","любимый"],["to find","finden","находить"],["light","hell","светлый"],["child","Kind","ребёнок"],["to clean","sauber machen; putzen","убирать; чистить"],["to close","schließen; zumachen","закрывать"],["to open","öffnen; aufmachen","открывать"],["picture","Bild","картина; рисунок"],["to sit down","sich (hin-)setzen","садиться"],["to speak","sprechen","говорить"],["to stand up","aufstehen","вставать"],["to take out","herausnehmen","вынимать"],["class","(Schul-)Klasse","класс"]]}]},{"n":2,"t":"At the zoo","s":[{"t":"At the wildlife park","w":[["zoo","Zoo","зоопарк"],["tree","Baum","дерево"],["giraffe","Giraffe","жираф"],["train","Zug","поезд"],["monkey","Affe","обезьяна"],["parrot","Papagei","попугай"],["penguin","Pinguin","пингвин"],["guide","Reise(führer/in) / Führer(in)","гид; экскурсовод"],["lion","Löwe","лев"],["dog","Hund","собака"]]},{"t":"Prepositions of place","w":[["in","in","в"],["on","auf","на"],["under","unter","под"],["behind","hinter","за; позади"],["in front of","vor","перед"],["next to","neben","рядом с"]]},{"t":"More Words and Phrases","w":[["beautiful","schön; hübsch","красивый"],["big","groß","большой"],["small","klein","маленький"],["now","jetzt","сейчас"],["there is (there’s)","es gibt; da ist","есть; имеется"],["there are","es gibt; da sind","есть; имеются"],["What is it?","Was ist das?","Что это?"],["Where is …?","Wo ist …?","Где …?"],["adult","Erwachsene/r","взрослый"],["to bring","(mit-)bringen","приносить"],["to feed","füttern","кормить"],["quiet","leise; ruhig","тихий; спокойный"],["to turn around","herumdrehen","поворачиваться"],["welcome","willkommen","добро пожаловать"],["from","aus","из"],["year","Jahr","год"],["he","er","он"],["she","sie","она"],["to talk","sprechen; sich unterhalten","разговаривать"],["they","sie (Plural)","они"],["we","wir","мы"],["for","für","для"],["happy","glücklich; fröhlich; zufrieden","счастливый; радостный"],["to let somebody out","jemanden herauslassen","выпустить кого-то"],["us","uns","нас; нам"],["car","Auto","машина; автомобиль"],["At last.","Endlich.","Наконец-то."],["How strange!","Wie komisch!","Как странно!"],["Let me see.","Lass (mich) mal schauen.","Дай(те) посмотреть."]]}]},{"n":3,"t":"Pirates","s":[{"t":"The body","w":[["finger","Finger","палец"],["ear","Ohr","ухо"],["nose","Nase","нос"],["hair","Haare","волосы"],["eye","Auge","глаз"],["mouth","Mund","рот"],["beard","Bart","борода"],["shoulder","Schulter","плечо"],["right arm","rechter Arm","правая рука"],["left arm","linker Arm","левая рука"],["leg","Bein","нога"],["foot","Fuß","ступня"],["feet","Füße","ступни"],["tooth","Zahn","зуб"],["teeth","Zähne","зубы"],["tall","groß (Person)","высокий (о человеке)"],["short","klein (Person); kurz","невысокий; короткий"],["big","groß","большой"],["small","klein","маленький"],["long","lang","длинный"]]},{"t":"Pirates picture","w":[["pirate","Pirat/in","пират"],["ship","Schiff","корабль"],["sea","Meer","море"],["treasure","Schatz","сокровище"],["wooden leg","Holzbein","деревянная нога"],["hook","Haken","крюк"]]},{"t":"More Words and Phrases","w":[["also","auch","тоже; также"],["famous","berühmt","знаменитый"],["him","ihm/ihn","его; ему"],["his","sein/e","его (принадлежность)"],["to be scared (of)","Angst haben (vor)","бояться (кого-то / чего-то)"],["very","sehr","очень"],["strong","stark; kräftig","сильный"],["captain","Kapitän","капитан"],["have got / has got","haben","иметь; у меня есть"],["pretty","hübsch","хорошенький; симпатичный"],["purple","violett; lila","фиолетовый"],["a lot of / lots of","viel/e","много"],["bed","Bett","кровать"],["dream","Traum","сон; мечта"],["tired","müde","усталый"],["to guess","raten","угадывать"],["It’s your turn.","Du bist an der Reihe.","Твоя очередь."],["brother","Bruder","брат"],["blonde","blond","светловолосый"],["real","echt; wirklich","настоящий"],["wrong","falsch; nicht in Ordnung","неправильный"],["Good idea.","Gute Idee.","Хорошая идея."],["true","wahr","верный; правдивый"]]}]},{"n":4,"t":"Emotions","s":[{"t":"Feelings","w":[["cold","kalt","холодный"],["angry","wütend","сердитый; злой"],["happy","glücklich; fröhlich","счастливый; радостный"],["scared","ängstlich","испуганный"],["excited","aufgeregt","взволнованный"],["hot","heiß","жаркий; горячий"],["sad","traurig","грустный"],["bored","gelangweilt","скучающий"],["hungry","hungrig","голодный"],["nervous","nervös","нервный"],["tired","müde","усталый"],["proud","stolz","гордый"]]},{"t":"Times of the day","w":[["morning","Morgen; Vormittag","утро"],["lunchtime","Mittagspause","обеденный перерыв"],["afternoon","Nachmittag","вторая половина дня"],["evening","Abend","вечер"],["night","Nacht","ночь"]]},{"t":"Days of the week","w":[["Monday","Montag","понедельник"],["Tuesday","Dienstag","вторник"],["Wednesday","Mittwoch","среда"],["Thursday","Donnerstag","четверг"],["Friday","Freitag","пятница"],["Saturday","Samstag","суббота"],["Sunday","Sonntag","воскресенье"]]},{"t":"More Words and Phrases","w":[["after","nach","после"],["day","Tag","день"],["end","Ende","конец"],["fun","Spaß","удовольствие; веселье"],["Go away!","Geh weg!","Уходи!"],["to help","helfen","помогать"],["home","nach Hause; Zuhause","домой; дом"],["It’s no good.","Es hat keinen Zweck.","Бесполезно."],["mum","Mama; Mutter","мама"],["next","nächste/r/s","следующий"],["still (not)","immer noch (nicht)","всё ещё (не)"],["a day in the life of","ein Tag im Leben von","день из жизни"],["to be asleep","schlafen","спать"],["early","früh","рано"],["life (pl. lives)","Leben","жизнь"],["sun","Sonne","солнце"],["Are you OK?","Geht’s dir/euch/Ihnen gut?","Ты в порядке?"],["homework (no pl.)","Hausaufgaben","домашнее задание"],["into","in (+ Akkusativ); hinein","в (куда); внутрь"],["Oh dear!","Du meine Güte!","Ой-ой! / Боже мой!"],["room","Zimmer; Raum","комната"],["why","warum","почему"],["bad","schlecht; böse","плохой"],["Don’t be late.","Komm(t) nicht zu spät. / Sei(d) pünktlich.","Не опаздывай."],["tomorrow","morgen","завтра"],["birthday","Geburtstag","день рождения"],["friend","Freund/Freundin","друг; подруга"],["Be yourself.","Sei du selbst.","Будь собой."],["no one else","niemand anderes","никто другой; больше никто"],["bottle","Flasche","бутылка"],["to get back","zurückholen; zurückbekommen","вернуть; получить обратно"],["mad","wütend; zornig","злой; в ярости"],["magic","magisch; Zauber-","волшебный"],["to rob","stehlen; ausrauben","грабить; красть"],["to break","(zer-)brechen","ломать; разбивать"],["to go to sleep","schlafen gehen","ложиться спать"],["because","weil","потому что"],["It’s me.","Ich bin’s.","Это я."],["Try it!","Versuch es!","Попробуй!"],["Let go!","Lass(t) los!","Отпусти!"],["What’s happening?","Was ist (hier) los?","Что происходит?"]]}]},{"n":5,"t":"This is our band","s":[{"t":"Musicians and instruments","w":[["keyboard player","Keyboardspieler/in","клавишник"],["keyboard","Keyboard","синтезатор"],["drummer","Schlagzeuger/in","барабанщик"],["drums","Schlagzeug","барабаны; ударная установка"],["singer","Sänger/in","певец; певица"],["player","Spieler/in; Musiker/in","игрок; музыкант"],["saxophone","Saxofon","саксофон"],["guitar","Gitarre","гитара"]]},{"t":"More Words and Phrases","w":[["boyfriend","fester Freund","парень (молодой человек)"],["its","sein/e; ihr/e (für Sachen/Tiere)","его; её (о предметах и животных)"],["to play","spielen","играть"],["sister","Schwester","сестра"],["can; cannot / can’t","können; nicht können","мочь; не мочь"],["concert","Konzert","концерт"],["to dance","tanzen","танцевать"],["Don’t worry.","Keine Sorge.","Не волнуйся."],["job","Arbeit; Aufgabe","работа; задание"],["perfect","perfekt","идеальный"],["to carry","tragen","нести"],["to stand on","auf etwas stehen","стоять на чём-то"],["tongue","Zunge","язык (орган)"],["to touch","berühren","трогать"],["to walk on","auf etwas gehen","ходить по чему-то"],["to wiggle","wackeln","шевелить"],["can (noun)","Dose","банка"],["to drink","trinken","пить"],["hundred","hundert","сто"],["in one go","in einem Zug; auf einmal","за один раз"],["Is that so?","Ach wirklich?","Правда?"],["This is me.","Das bin ich!","Это я!"],["economy","Wirtschaft","экономика"],["hospital","Krankenhaus","больница"],["to laugh","lachen","смеяться"],["(pocket) money","(Taschen-)Geld","(карманные) деньги"],["pound","Pfund","фунт"],["profit","Gewinn; Profit","прибыль"],["school canteen","Schulkantine","школьная столовая"],["table","Tisch","стол"],["teacher","Lehrer/Lehrerin","учитель; учительница"],["uncle","Onkel","дядя"],["to wash","waschen","мыть; стирать"],["nothing","nichts","ничего"],["Sorry?","Entschuldigung?; Wie bitte?","Простите? / Что-что?"]]}]}] },
+  gleb: { name: 'G’s collection: Family & relationships', title: 'G’s collection', target: 'en', unit: 'Part', prefix: 'gleb:', data: [{"n":1,"t":"Family","s":[{"t":"Family","w":[["In two thirds of Austrian households is at least one child.","In zwei Dritteln der österreichischen Haushalte gibt es mindestens ein Kind.","В двух третях австрийских семей есть хотя бы один ребёнок."],["I don’t have any brothers and sisters; I’m an only child.","Ich habe keine Geschwister; ich bin ein Einzelkind.","У меня нет братьев и сестёр; я единственный ребёнок."],["I don’t have any siblings, but I have a lot of cousins.","Ich habe keine Geschwister, aber ich habe viele Cousins und Cousinen.","У меня нет братьев и сестёр, но у меня много двоюродных братьев и сестёр."],["The age gap between my parents is only 2 years.","Der Altersunterschied zwischen meinen Eltern beträgt nur zwei Jahre.","Разница в возрасте между моими родителями всего два года."],["Lucy moved out of her parental home and has her own apartment now.","Lucy ist aus ihrem Elternhaus ausgezogen und hat jetzt eine eigene Wohnung.","Люси уехала из родительского дома, и теперь у неё своя квартира."],["Children under 14 must be accompanied by an adult.","Kinder unter 14 Jahren müssen von einem Erwachsenen begleitet werden.","Дети до 14 лет должны быть в сопровождении взрослого."],["The number of single-parent families is growing fast.","Die Zahl der Alleinerziehendenfamilien steigt schnell.","Число неполных семей быстро растёт."],["They have agreed to get a divorce, because they don’t want to be married to each other anymore.","Sie haben sich auf eine Scheidung geeinigt, weil sie nicht mehr miteinander verheiratet sein wollen.","Они договорились развестись, потому что больше не хотят быть в браке друг с другом."],["They are considering separation as an option.","Sie ziehen eine Trennung als Möglichkeit in Betracht.","Они рассматривают расставание как вариант."],["Amy can’t go. In that case, I have to go for her.","Amy kann nicht gehen. In diesem Fall muss ich für sie gehen.","Эми не может пойти. В таком случае мне придётся пойти вместо неё."],["Blended families and stepfamilies with children from former marriages are becoming more common.","Patchwork- und Stieffamilien mit Kindern aus früheren Ehen werden immer häufiger.","Смешанные семьи и семьи с детьми от прежних браков встречаются всё чаще."],["Do you have any stepsiblings? I have two stepsisters.","Hast du Stiefgeschwister? Ich habe zwei Stiefschwestern.","У тебя есть сводные братья или сёстры? У меня две сводные сестры."],["Leon is my stepbrother. He’s my stepmother’s son.","Leon ist mein Stiefbruder. Er ist der Sohn meiner Stiefmutter.","Леон мой сводный брат. Он сын моей мачехи."],["Lisa is my stepsister. Her father married my mother.","Lisa ist meine Stiefschwester. Ihr Vater hat meine Mutter geheiratet.","Лиза моя сводная сестра. Её отец женился на моей маме."],["My mother has a daughter from her previous marriage. She’s my half-sibling.","Meine Mutter hat eine Tochter aus ihrer früheren Ehe. Sie ist meine Halbschwester.","У моей мамы есть дочь от предыдущего брака. Она моя единоутробная сестра."],["I don’t see my half-brother often. He lives with our dad.","Ich sehe meinen Halbbruder nicht oft. Er wohnt bei unserem Vater.","Я нечасто вижу своего единокровного брата. Он живёт с нашим папой."],["I started playing football at the age of 6.","Ich habe im Alter von sechs Jahren angefangen, Fußball zu spielen.","Я начал играть в футбол в шесть лет."],["Nadia and her husband want to start a family.","Nadia und ihr Mann wollen eine Familie gründen.","Надя и её муж хотят завести семью."]]}]},{"n":2,"t":"Housework & childcare","s":[{"t":"Housework & childcare","w":[["My mother does most of the chores.","Meine Mutter erledigt den Großteil der Hausarbeit.","Моя мама делает большую часть домашних дел."],["When my mom started working again, my grandmother looked after me.","Als meine Mutter wieder zu arbeiten anfing, passte meine Großmutter auf mich auf.","Когда мама снова начала работать, за мной присматривала бабушка."],["In my family everyone has to do a fair share of housework.","In meiner Familie muss jeder seinen gerechten Anteil an der Hausarbeit übernehmen.","В моей семье каждый должен делать свою часть домашней работы."],["My dad does the housework. He cooks and cleans.","Mein Vater erledigt die Hausarbeit. Er kocht und putzt.","Мой папа занимается домашним хозяйством. Он готовит и убирает."],["Who will do the childminding while you are at work?","Wer übernimmt die Kinderbetreuung, während du bei der Arbeit bist?","Кто будет присматривать за ребёнком, пока ты на работе?"],["My brother and I do the washing-up together every night.","Mein Bruder und ich spülen jeden Abend gemeinsam ab.","Мы с братом каждый вечер вместе моем посуду."],["My dad does most of the small repairs around the house.","Mein Vater erledigt die meisten kleinen Reparaturen im Haus.","Папа делает большую часть мелкого ремонта по дому."]]}]},{"n":3,"t":"Relationships & feelings","s":[{"t":"Relationships & feelings","w":[["She was a contented person with a hearty laugh.","Sie war ein zufriedener Mensch mit einem herzlichen Lachen.","Она была довольным жизнью человеком с сердечным смехом."],["We need social contact to feel secure.","Wir brauchen soziale Kontakte, um uns sicher zu fühlen.","Нам нужно общение, чтобы чувствовать себя в безопасности."],["Relationships cause powerful emotions.","Beziehungen lösen starke Gefühle aus.","Отношения вызывают сильные чувства."],["Dad didn’t come to my football game. He let me down again.","Papa ist nicht zu meinem Fußballspiel gekommen. Er hat mich wieder enttäuscht.","Папа не пришёл на мой футбольный матч. Он снова меня подвёл."],["There are growing tensions between the two countries.","Zwischen den beiden Ländern nehmen die Spannungen zu.","Напряжённость между двумя странами растёт."],["I’m going to a family party to see all my relatives.","Ich gehe zu einer Familienfeier, um alle meine Verwandten zu sehen.","Я иду на семейный праздник, чтобы увидеть всех своих родственников."],["She left home after falling out with her parents.","Sie verließ ihr Zuhause, nachdem sie sich mit ihren Eltern gestritten hatte.","Она ушла из дома после ссоры с родителями."],["There is no place for hatred in our society.","In unserer Gesellschaft ist kein Platz für Hass.","В нашем обществе нет места ненависти."],["They don’t keep any secrets from each other.","Sie haben keine Geheimnisse voreinander.","У них нет секретов друг от друга."],["You shouldn’t judge him before you get to know him.","Du solltest ihn nicht beurteilen, bevor du ihn kennenlernst.","Не стоит судить о нём, пока ты его не узнаешь."],["Being a good friend is quite a responsibility.","Ein guter Freund zu sein, ist eine große Verantwortung.","Быть хорошим другом — большая ответственность."],["Let’s not have an argument. Let’s agree to disagree.","Lass uns nicht streiten. Einigen wir uns darauf, unterschiedlicher Meinung zu sein.","Давай не будем спорить. Пусть каждый останется при своём мнении."],["Mia and I argue a lot but we always make up in the end.","Mia und ich streiten oft, aber am Ende versöhnen wir uns immer.","Мы с Мией часто спорим, но в конце всегда миримся."],["He’s had a lifelong interest in science.","Er interessiert sich schon sein ganzes Leben lang für Wissenschaft.","Он всю жизнь интересуется наукой."],["We’ve had a long friendship. We’ve been friends for years.","Uns verbindet eine lange Freundschaft. Wir sind seit Jahren befreundet.","Нас связывает долгая дружба. Мы дружим уже много лет."],["Teens join cliques to feel accepted and to have someone to go do activities with.","Jugendliche schließen sich Cliquen an, um sich akzeptiert zu fühlen und jemanden für gemeinsame Aktivitäten zu haben.","Подростки объединяются в компании, чтобы чувствовать себя принятыми и было с кем проводить время."],["There’s a special bond between a mother and her child.","Zwischen einer Mutter und ihrem Kind besteht eine besondere Bindung.","Между матерью и ребёнком существует особая связь."]]}]},{"n":4,"t":"Friends & society","s":[{"t":"Friends & society","w":[["My friend Allie and I have lots of things in common, e.g. we both like sports and play the trumpet.","Meine Freundin Allie und ich haben viel gemeinsam, z. B. mögen wir beide Sport und spielen Trompete.","У нас с моей подругой Элли много общего, например, мы обе любим спорт и играем на трубе."],["My parents and I have different attitudes to social media. I love it and use it every day, but they say it’s a waste of time.","Meine Eltern und ich haben unterschiedliche Einstellungen zu sozialen Medien. Ich liebe sie und nutze sie jeden Tag, aber sie finden, das ist Zeitverschwendung.","У нас с родителями разное отношение к соцсетям. Я их люблю и пользуюсь ими каждый день, а они считают, что это пустая трата времени."],["My friends are really nice. They’re good company too.","Meine Freunde sind wirklich nett. Mit ihnen kann man auch gut Zeit verbringen.","Мои друзья очень милые. С ними к тому же приятно проводить время."],["Our peers influence our opinions and behaviour.","Unsere Gleichaltrigen beeinflussen unsere Meinungen und unser Verhalten.","Сверстники влияют на наши мнения и поведение."],["Peer group pressure can be very powerful and difficult to resist.","Gruppendruck unter Gleichaltrigen kann sehr stark sein, und es ist schwer, ihm zu widerstehen.","Давление сверстников может быть очень сильным, и ему трудно противостоять."],["There are many people we have to get along with who are not necessarily friends.","Es gibt viele Menschen, mit denen wir auskommen müssen, die aber nicht unbedingt Freunde sind.","Есть много людей, с которыми нам приходится ладить, хотя они не обязательно наши друзья."],["My parents still treat me like a child.","Meine Eltern behandeln mich immer noch wie ein Kind.","Родители до сих пор обращаются со мной как с ребёнком."],["Always show respect to everyone, whether they are older than you or not.","Behandle alle mit Respekt, egal ob sie älter sind als du oder nicht.","Всегда относись ко всем с уважением, старше они тебя или нет."],["Bullying is a problem in many schools.","Mobbing ist an vielen Schulen ein Problem.","Травля — проблема во многих школах."],["Smoking can harm the well-being of others.","Rauchen kann das Wohlbefinden anderer beeinträchtigen.","Курение может вредить благополучию других людей."],["Parents often teach their children not to talk to strangers.","Eltern bringen ihren Kindern oft bei, nicht mit Fremden zu sprechen.","Родители часто учат детей не разговаривать с незнакомцами."],["We bumped into Amy when we were in town last week.","Wir sind Amy zufällig begegnet, als wir letzte Woche in der Stadt waren.","На прошлой неделе мы случайно встретили Эми в городе."],["The reconnected after 20 years thanks to a chance meeting at a restaurant.","Dank einer zufälligen Begegnung in einem Restaurant fanden sie nach 20 Jahren wieder zueinander.","Благодаря случайной встрече в ресторане они снова нашли друг друга через 20 лет."]]}]}] },
+  dea2: { name: 'German A2 for English speakers', title: 'German A2 Vocabulary', target: 'de', unit: 'Topic', prefix: 'dea2:', data: [{"n":1,"t":"Everyday basics","s":[{"t":"Greetings & introductions","w":[["Hello!","Hallo!","Привет!"],["Good evening!","Guten Abend!","Добрый вечер!"],["Goodbye! (formal)","Auf Wiedersehen!","До свидания!"],["Bye!","Tschüss!","Пока!"],["How are you? (informal)","Wie geht es dir?","Как у тебя дела?"],["I'm fine, thanks.","Mir geht es gut, danke.","У меня всё хорошо, спасибо."],["What's your name? (informal)","Wie heißt du?","Как тебя зовут?"],["My name is Anna.","Ich heiße Anna.","Меня зовут Анна."],["I come from England.","Ich komme aus England.","Я из Англии."],["I live in Berlin.","Ich wohne in Berlin.","Я живу в Берлине."],["I speak a little German.","Ich spreche ein bisschen Deutsch.","Я немного говорю по-немецки."],["Sorry, I don't understand.","Entschuldigung, ich verstehe das nicht.","Извините, я этого не понимаю."],["please","bitte","пожалуйста"],["thank you very much","vielen Dank","большое спасибо"]]},{"t":"Numbers, days & time","w":[["What time is it?","Wie spät ist es?","Который час?"],["It's three o'clock.","Es ist drei Uhr.","Сейчас три часа."],["today","heute","сегодня"],["tomorrow","morgen","завтра"],["yesterday","gestern","вчера"],["the week","die Woche","неделя"],["the month","der Monat","месяц"],["the year","das Jahr","год"],["Monday","Montag","понедельник"],["the weekend","das Wochenende","выходные"],["in the morning","am Morgen","утром"],["in the evening","am Abend","вечером"],["always","immer","всегда"],["often","oft","часто"],["sometimes","manchmal","иногда"],["never","nie","никогда"]]},{"t":"Colours & simple descriptions","w":[["red","rot","красный"],["blue","blau","синий"],["green","grün","зелёный"],["yellow","gelb","жёлтый"],["black","schwarz","чёрный"],["white","weiß","белый"],["grey","grau","серый"],["big","groß","большой"],["small","klein","маленький"],["new","neu","новый"],["old","alt","старый"],["cheap","billig / günstig","дешёвый"],["expensive","teuer","дорогой"],["beautiful","schön","красивый"]]},{"t":"Body & feeling unwell","w":[["the head","der Kopf","голова"],["the eye","das Auge","глаз"],["the ear","das Ohr","ухо"],["the nose","die Nase","нос"],["the mouth","der Mund","рот"],["the tooth","der Zahn","зуб"],["the arm","der Arm","рука"],["the hand","die Hand","кисть; рука"],["the leg","das Bein","нога"],["the foot","der Fuß","ступня"],["I'm ill.","Ich bin krank.","Я болен. / Я больна."],["My stomach hurts.","Ich habe Bauchschmerzen.","У меня болит живот."],["the cough","der Husten","кашель"],["the doctor","der Arzt / die Ärztin","врач"]]}]},{"n":2,"t":"Food, drinks & restaurant","s":[{"t":"Food","w":[["the bread","das Brot","хлеб"],["the bread roll","das Brötchen","булочка"],["the butter","die Butter","сливочное масло"],["the cheese","der Käse","сыр"],["the egg","das Ei","яйцо"],["the meat","das Fleisch","мясо"],["the chicken (meat)","das Hähnchen","курица (мясо)"],["the fish","der Fisch","рыба"],["the potato","die Kartoffel","картофель"],["the rice","der Reis","рис"],["the vegetables","das Gemüse","овощи"],["the fruit","das Obst","фрукты"],["the apple","der Apfel","яблоко"],["the soup","die Suppe","суп"]]},{"t":"Drinks","w":[["the water","das Wasser","вода"],["the coffee","der Kaffee","кофе"],["the tea","der Tee","чай"],["the milk","die Milch","молоко"],["the juice","der Saft","сок"],["the beer","das Bier","пиво"],["the wine","der Wein","вино"],["I'm thirsty.","Ich habe Durst.","Я хочу пить."],["I'm hungry.","Ich habe Hunger.","Я голоден. / Я голодна."],["a cup of coffee","eine Tasse Kaffee","чашка кофе"],["a bottle of water","eine Flasche Wasser","бутылка воды"]]},{"t":"At the restaurant","w":[["the restaurant","das Restaurant","ресторан"],["the waiter","der Kellner / die Kellnerin","официант; официантка"],["I'd like the soup, please.","Ich hätte gern die Suppe.","Мне, пожалуйста, суп."],["I'll have a coffee.","Ich nehme einen Kaffee.","Я возьму кофе."],["Anything else?","Sonst noch etwas?","Что-нибудь ещё?"],["Enjoy your meal!","Guten Appetit!","Приятного аппетита!"],["That was delicious.","Das war lecker.","Было очень вкусно."],["I'd like to pay, please.","Ich möchte bitte bezahlen.","Я хотел бы расплатиться."],["How much is that?","Wie viel kostet das?","Сколько это стоит?"],["the breakfast","das Frühstück","завтрак"],["the lunch","das Mittagessen","обед"],["the dinner","das Abendessen","ужин"]]}]},{"n":3,"t":"Travel, transport & shopping","s":[{"t":"Getting around","w":[["the train","der Zug","поезд"],["the bus","der Bus","автобус"],["the tram","die Straßenbahn","трамвай"],["the underground","die U-Bahn","метро"],["the station","der Bahnhof","вокзал"],["the stop","die Haltestelle","остановка"],["the ticket","die Fahrkarte / das Ticket","билет"],["the airport","der Flughafen","аэропорт"],["the car","das Auto","машина"],["the bike","das Fahrrad","велосипед"],["to drive (go by vehicle)","fahren","ехать"],["to walk (go on foot)","zu Fuß gehen","идти пешком"],["on the left","links","налево; слева"],["on the right","rechts","направо; справа"],["straight on","geradeaus","прямо"],["Where is the station?","Wo ist der Bahnhof?","Где вокзал?"]]},{"t":"Holiday & hotel","w":[["the holiday","der Urlaub","отпуск"],["the hotel","das Hotel","гостиница"],["the room","das Zimmer","номер; комната"],["the key","der Schlüssel","ключ"],["the suitcase","der Koffer","чемодан"],["the beach","der Strand","пляж"],["the mountains","die Berge","горы"],["the city","die Stadt","город"],["the map","die Karte / der Stadtplan","карта; план города"],["to travel","reisen","путешествовать"],["I have a reservation.","Ich habe eine Reservierung.","У меня забронирован номер."]]},{"t":"Shopping","w":[["the shop","das Geschäft / der Laden","магазин"],["the supermarket","der Supermarkt","супермаркет"],["the bakery","die Bäckerei","пекарня"],["to buy","kaufen","покупать"],["to pay","bezahlen","платить"],["the price","der Preis","цена"],["the money","das Geld","деньги"],["the euro","der Euro","евро"],["the size (clothes)","die Größe","размер"],["Do you have this in size M?","Haben Sie das in Größe M?","У вас есть это в размере M?"],["the bag","die Tüte","пакет"],["the clothes","die Kleidung","одежда"],["the shoes","die Schuhe","обувь"],["open","geöffnet / offen","открыто"],["closed","geschlossen / zu","закрыто"]]}]},{"n":4,"t":"Work, office & media","s":[{"t":"Jobs & workplace","w":[["the job","die Arbeit / der Job","работа"],["to work","arbeiten","работать"],["the job (profession)","der Beruf","профессия"],["the office","das Büro","офис"],["the company","die Firma","фирма; компания"],["the colleague","der Kollege / die Kollegin","коллега"],["the boss","der Chef / die Chefin","начальник; начальница"],["the computer","der Computer","компьютер"],["the break","die Pause","перерыв"],["to start","anfangen","начинать"],["to stop (finish)","aufhören","прекращать; заканчивать"],["I work as a teacher.","Ich arbeite als Lehrer.","Я работаю учителем."],["I work eight hours a day.","Ich arbeite acht Stunden am Tag.","Я работаю восемь часов в день."],["the free time","die Freizeit","свободное время"]]},{"t":"Email & media","w":[["the email","die E-Mail","электронное письмо"],["to write","schreiben","писать"],["to send","schicken","отправлять"],["to read","lesen","читать"],["the internet","das Internet","интернет"],["the mobile phone","das Handy","мобильный телефон"],["the message","die Nachricht","сообщение"],["the newspaper","die Zeitung","газета"],["the television","der Fernseher","телевизор"],["to watch TV","fernsehen","смотреть телевизор"],["the film","der Film","фильм"],["the photo","das Foto","фотография"],["Dear Mr Huber,","Sehr geehrter Herr Huber,","Уважаемый господин Хубер,"],["Best wishes","Viele Grüße","С наилучшими пожеланиями"]]}]},{"n":5,"t":"School","s":[{"t":"At school","w":[["the school","die Schule","школа"],["the teacher","der Lehrer / die Lehrerin","учитель; учительница"],["the pupil","der Schüler / die Schülerin","ученик; ученица"],["the class","die Klasse","класс"],["the classroom","das Klassenzimmer","классная комната"],["the lesson","die Stunde / der Unterricht","урок"],["the book","das Buch","книга"],["the exercise book","das Heft","тетрадь"],["the pen","der Kuli / der Stift","ручка"],["to learn","lernen","учить; учиться"],["to understand","verstehen","понимать"],["the question","die Frage","вопрос"],["the answer","die Antwort","ответ"],["the test","der Test","тест; контрольная"]]},{"t":"Subjects & school day","w":[["German (subject)","Deutsch","немецкий язык (предмет)"],["English (subject)","Englisch","английский язык (предмет)"],["maths","Mathe","математика"],["sport (PE)","Sport","физкультура"],["music","Musik","музыка"],["art","Kunst","рисование; искусство"],["the homework","die Hausaufgaben","домашнее задание"],["the holidays (school)","die Ferien","каникулы"],["School starts at eight.","Die Schule beginnt um acht.","Уроки начинаются в восемь."],["My daughter is in third grade.","Meine Tochter ist in der dritten Klasse.","Моя дочь учится в третьем классе."],["easy","leicht","лёгкий"],["difficult","schwer / schwierig","трудный"]]}]},{"n":6,"t":"Parenting","s":[{"t":"Family","w":[["the family","die Familie","семья"],["the parents","die Eltern","родители"],["the mother","die Mutter","мать"],["the father","der Vater","отец"],["the child","das Kind","ребёнок"],["the son","der Sohn","сын"],["the daughter","die Tochter","дочь"],["the brother","der Bruder","брат"],["the sister","die Schwester","сестра"],["the grandmother","die Oma / die Großmutter","бабушка"],["the grandfather","der Opa / der Großvater","дедушка"],["the baby","das Baby","малыш; младенец"],["How old is your son?","Wie alt ist dein Sohn?","Сколько лет твоему сыну?"],["He is five years old.","Er ist fünf Jahre alt.","Ему пять лет."]]},{"t":"Everyday with children","w":[["to play","spielen","играть"],["the toy","das Spielzeug","игрушка"],["to sleep","schlafen","спать"],["to get up","aufstehen","вставать"],["to wash","waschen","мыть; стирать"],["to get dressed","sich anziehen","одеваться"],["to brush your teeth","sich die Zähne putzen / Zähne putzen","чистить зубы"],["to cry","weinen","плакать"],["to laugh","lachen","смеяться"],["Be careful!","Pass auf!","Осторожно!"],["Well done!","Gut gemacht!","Молодец!"],["Time for bed!","Ab ins Bett!","Пора спать!"],["the kindergarten","der Kindergarten","детский сад"],["the playground","der Spielplatz","детская площадка"]]}]},{"n":7,"t":"Social life","s":[{"t":"Free time & plans","w":[["the hobby","das Hobby","хобби"],["the friend","der Freund / die Freundin","друг; подруга"],["the party","die Party","вечеринка"],["the birthday","der Geburtstag","день рождения"],["Happy birthday!","Alles Gute zum Geburtstag!","С днём рождения!"],["the present","das Geschenk","подарок"],["to go out","ausgehen","ходить куда-нибудь (развлечься)"],["to dance","tanzen","танцевать"],["to cook","kochen","готовить"],["the cinema","das Kino","кино"],["Do you have time on Saturday?","Hast du am Samstag Zeit?","У тебя есть время в субботу?"],["Shall we go to the cinema?","Gehen wir ins Kino?","Пойдём в кино?"],["Good idea!","Gute Idee!","Хорошая идея!"],["Sorry, I have no time.","Tut mir leid, ich habe keine Zeit.","Извини, у меня нет времени."],["See you on Friday!","Bis Freitag!","До пятницы!"]]},{"t":"Likes & feelings","w":[["I like that.","Das gefällt mir.","Мне это нравится."],["I like swimming.","Ich schwimme gern.","Я люблю плавать."],["I don't like it.","Das mag ich nicht.","Мне это не нравится."],["happy","glücklich / froh","счастливый; радостный"],["sad","traurig","грустный"],["tired","müde","усталый"],["angry","wütend / sauer","злой; сердитый"],["bored","gelangweilt","скучающий"],["nice (person)","nett","милый; приятный"],["funny","lustig","весёлый; смешной"],["boring","langweilig","скучный"],["interesting","interessant","интересный"]]}]},{"n":8,"t":"Phone calls","s":[{"t":"On the phone","w":[["to phone","telefonieren","разговаривать по телефону"],["to call (someone)","anrufen","звонить"],["the phone number","die Telefonnummer","номер телефона"],["Hello, this is Anna.","Hallo, hier ist Anna.","Привет, это Анна."],["Who is speaking?","Wer spricht da?","Кто говорит?"],["I'd like to speak to Mr Huber.","Ich möchte mit Herrn Huber sprechen.","Я хотел бы поговорить с господином Хубером."],["He isn't here.","Er ist nicht da.","Его нет на месте."],["Please call me back.","Bitte rufen Sie mich zurück.","Пожалуйста, перезвоните мне."],["Can you repeat that, please?","Können Sie das bitte wiederholen?","Повторите, пожалуйста."],["Wrong number.","Falsch verbunden.","Вы ошиблись номером."],["Speak to you soon!","Bis bald!","До скорого!"]]},{"t":"Messages & appointments","w":[["the appointment","der Termin","встреча; запись (к врачу)"],["I need an appointment.","Ich brauche einen Termin.","Мне нужна запись. / Мне нужно назначить встречу."],["When do you have time?","Wann haben Sie Zeit?","Когда у вас есть время?"],["Is Tuesday OK?","Geht es am Dienstag?","Во вторник подойдёт?"],["That works.","Das passt.","Это подходит."],["That doesn't work.","Das geht nicht.","Так не получится."],["I'm late.","Ich komme zu spät.","Я опаздываю."],["to wait","warten","ждать"],["to text (send a message)","eine Nachricht schreiben","написать сообщение"],["My phone number is …","Meine Telefonnummer ist …","Мой номер телефона …"]]}]},{"n":9,"t":"Public services","s":[{"t":"Forms & offices","w":[["the office (authority)","das Amt","ведомство; учреждение"],["the form","das Formular","анкета; бланк"],["the name","der Name","имя; фамилия"],["the first name","der Vorname","имя"],["the surname","der Nachname","фамилия"],["the address","die Adresse","адрес"],["the date of birth","das Geburtsdatum","дата рождения"],["the place of birth","der Geburtsort","место рождения"],["married","verheiratet","женатый; замужем"],["single","ledig","холост; не замужем"],["the passport","der Pass / der Reisepass","паспорт"],["the ID card","der Personalausweis","удостоверение личности"],["to sign","unterschreiben","подписывать"],["Where do I have to sign?","Wo muss ich unterschreiben?","Где мне нужно подписать?"]]},{"t":"Doctor, bank & post","w":[["the doctor's surgery","die Praxis / die Arztpraxis","кабинет врача; приёмная"],["the pharmacy","die Apotheke","аптека"],["the medicine","das Medikament","лекарство"],["the tablet","die Tablette","таблетка"],["the hospital","das Krankenhaus","больница"],["the bank","die Bank","банк"],["the account","das Konto","счёт"],["the cash machine","der Geldautomat","банкомат"],["the post office","die Post","почта"],["the letter","der Brief","письмо"],["the stamp","die Briefmarke","почтовая марка"],["the package","das Paket","посылка"],["the police","die Polizei","полиция"]]},{"t":"Home","w":[["the flat","die Wohnung","квартира"],["the house","das Haus","дом"],["the kitchen","die Küche","кухня"],["the bathroom","das Bad","ванная"],["the bedroom","das Schlafzimmer","спальня"],["the rent","die Miete","арендная плата; квартплата"],["the neighbour","der Nachbar / die Nachbarin","сосед; соседка"],["to move (house)","umziehen","переезжать"]]}]}] },
+  de: { name: 'German B1 for English speakers', title: 'German B1 Vocabulary', target: 'de', unit: 'Topic', prefix: 'de:', data: [{"n":1,"t":"Everyday basics","s":[{"t":"Greetings & small talk","w":[["Good morning!","Guten Morgen!","Доброе утро!"],["Nice to meet you.","Freut mich, Sie kennenzulernen.","Приятно познакомиться."],["How are you? (formal)","Wie geht es Ihnen?","Как у вас дела?"],["How's it going?","Wie geht's?","Как дела?"],["Not bad, thanks.","Nicht schlecht, danke.","Неплохо, спасибо."],["See you later!","Bis später!","До встречи!"],["Have a nice weekend!","Schönes Wochenende!","Хороших выходных!"],["Same to you!","Gleichfalls!","И вам того же!"],["Excuse me (to get attention)","Entschuldigen Sie","Извините (чтобы привлечь внимание)"],["to introduce oneself","sich vorstellen","представляться"],["Where are you from? (formal)","Woher kommen Sie?","Откуда вы?"],["What do you do for a living?","Was machen Sie beruflich?","Кем вы работаете?"],["It's pouring with rain.","Es regnet in Strömen.","Льёт как из ведра."],["to chat","sich unterhalten / plaudern","болтать; беседовать"]]},{"t":"Numbers, dates & time","w":[["quarter past three","Viertel nach drei","четверть четвёртого"],["half past six","halb sieben","половина седьмого"],["the appointment","der Termin","встреча; запись (к врачу)"],["the date (calendar)","das Datum","дата"],["the day after tomorrow","übermorgen","послезавтра"],["the day before yesterday","vorgestern","позавчера"],["every other week","alle zwei Wochen","раз в две недели"],["on time","pünktlich","вовремя; пунктуально"],["in advance","im Voraus","заранее"],["at the latest","spätestens","самое позднее"],["at the earliest","frühestens","самое раннее"],["recently","neulich / vor Kurzem","недавно"],["the first of May","der erste Mai","первое мая"],["the leap year","das Schaltjahr","високосный год"]]},{"t":"Colours & describing things","w":[["light blue","hellblau","голубой"],["dark green","dunkelgrün","тёмно-зелёный"],["colourful","bunt","разноцветный; пёстрый"],["striped","gestreift","полосатый"],["checked (pattern)","kariert","клетчатый"],["plain (one colour)","einfarbig","однотонный"],["square","quadratisch / viereckig","квадратный"],["heavy","schwer","тяжёлый"],["light (not heavy)","leicht","лёгкий (по весу)"],["soft","weich","мягкий"],["smooth","glatt","гладкий"],["rough","rau","шершавый; грубый"],["shiny","glänzend","блестящий"]]},{"t":"Body & health","w":[["the shoulder","die Schulter","плечо"],["the back","der Rücken","спина"],["the stomach","der Bauch","живот"],["the knee","das Knie","колено"],["the ankle","der Knöchel","лодыжка"],["the throat","der Hals","горло"],["I've got a headache.","Ich habe Kopfschmerzen.","У меня болит голова."],["I feel sick.","Mir ist schlecht.","Меня тошнит."],["to have a cold","erkältet sein","быть простуженным"],["the fever","das Fieber","температура; жар"],["to sprain","verstauchen","растянуть; подвернуть"],["It hurts here.","Es tut hier weh.","Здесь болит."],["to recover","sich erholen","выздоравливать; отдыхать"]]}]},{"n":2,"t":"Food, drinks & restaurant","s":[{"t":"At the restaurant","w":[["to book a table","einen Tisch reservieren","забронировать столик"],["Is this table free?","Ist dieser Tisch frei?","Этот столик свободен?"],["the menu","die Speisekarte","меню"],["the dish of the day","das Tagesgericht","блюдо дня"],["the starter","die Vorspeise","закуска"],["the main course","das Hauptgericht","основное блюдо"],["the dessert","die Nachspeise / das Dessert","десерт"],["What do you recommend?","Was empfehlen Sie?","Что вы посоветуете?"],["The bill, please.","Die Rechnung, bitte.","Счёт, пожалуйста."],["Together or separately?","Zusammen oder getrennt?","Вместе или раздельно?"],["Keep the change.","Stimmt so.","Сдачи не надо."],["the tip","das Trinkgeld","чаевые"],["to complain","sich beschweren","жаловаться"],["It tastes delicious.","Es schmeckt lecker.","Очень вкусно."]]},{"t":"Cooking & ingredients","w":[["the recipe","das Rezept (Kochen)","рецепт (кулинарный)"],["to peel","schälen","чистить (овощи)"],["to chop","klein schneiden","мелко нарезать"],["to fry","braten","жарить"],["to bake","backen","печь"],["to stir","umrühren","помешивать"],["the flour","das Mehl","мука"],["the onion","die Zwiebel","лук"],["the garlic","der Knoblauch","чеснок"],["the saucepan","der Kochtopf","кастрюля"],["the frying pan","die Pfanne","сковорода"],["the oven","der Backofen","духовка"],["spicy","scharf","острый"],["sour","sauer","кислый"]]},{"t":"Drinks & café","w":[["tap water","das Leitungswasser","водопроводная вода"],["sparkling water","das Sprudelwasser","газированная вода"],["still water","stilles Wasser","вода без газа"],["a glass of red wine","ein Glas Rotwein","бокал красного вина"],["draught beer","das Bier vom Fass","разливное пиво"],["Cheers!","Prost!","Будем здоровы!"],["coffee and cake","Kaffee und Kuchen","кофе с пирогом"],["to take away","zum Mitnehmen","с собой"],["to eat in","für hier / zum Hieressen","здесь (в заведении)"],["decaffeinated","entkoffeiniert","без кофеина"],["oat milk","die Hafermilch","овсяное молоко"]]}]},{"n":3,"t":"Travel, transport & shopping","s":[{"t":"Public transport","w":[["the platform","das Gleis / der Bahnsteig","путь; платформа"],["the departure","die Abfahrt","отправление"],["the arrival","die Ankunft","прибытие"],["the delay","die Verspätung","опоздание; задержка"],["to change (trains)","umsteigen","делать пересадку"],["the connection","der Anschluss","пересадка; стыковка"],["the monthly ticket","die Monatskarte","месячный проездной"],["to validate a ticket","eine Fahrkarte entwerten","прокомпостировать билет"],["the fare dodger","der Schwarzfahrer","безбилетник"],["the ticket inspection","die Fahrkartenkontrolle","проверка билетов"],["The train is cancelled.","Der Zug fällt aus.","Поезд отменён."],["the rush hour","der Berufsverkehr","час пик"],["the traffic jam","der Stau","пробка"]]},{"t":"Travel & accommodation","w":[["the booking confirmation","die Buchungsbestätigung","подтверждение бронирования"],["to check in","einchecken","регистрироваться (в отеле, аэропорту)"],["the luggage","das Gepäck","багаж"],["the hand luggage","das Handgepäck","ручная кладь"],["the single room","das Einzelzimmer","одноместный номер"],["the double room","das Doppelzimmer","двухместный номер"],["breakfast included","inklusive Frühstück","завтрак включён"],["the sight (tourist attraction)","die Sehenswürdigkeit","достопримечательность"],["the guided tour","die Führung","экскурсия"],["the passport","der Reisepass","паспорт; загранпаспорт"],["the border","die Grenze","граница"],["to cancel (a booking)","stornieren","отменить (бронь)"]]},{"t":"Shopping & paying","w":[["the receipt","der Kassenbon / die Quittung","чек"],["the special offer","das Sonderangebot","специальное предложение"],["reduced (on sale)","reduziert","со скидкой"],["the changing room","die Umkleidekabine","примерочная"],["to try on","anprobieren","примерять"],["to exchange (goods)","umtauschen","обменять (товар)"],["the refund","die Rückerstattung","возврат денег"],["to pay by card","mit Karte zahlen","платить картой"],["to pay in cash","bar zahlen","платить наличными"],["the checkout","die Kasse","касса"],["the bottle deposit","das Pfand","залог за бутылку"],["the opening hours","die Öffnungszeiten","часы работы"],["the shopping trolley","der Einkaufswagen","тележка для покупок"]]}]},{"n":4,"t":"Work, office & media","s":[{"t":"At the office","w":[["the colleague","der Kollege / die Kollegin","коллега"],["the boss","der Chef / die Chefin","начальник; начальница"],["the meeting","die Besprechung","совещание"],["the deadline","die Frist / die Deadline","срок; дедлайн"],["the agenda","die Tagesordnung","повестка дня"],["to postpone","verschieben","переносить; откладывать"],["flexitime","die Gleitzeit","гибкий график; скользящий график"],["to work from home","im Homeoffice arbeiten","работать из дома"],["the overtime","die Überstunden","сверхурочные"],["the salary","das Gehalt","зарплата"],["to be on sick leave","krankgeschrieben sein","быть на больничном"],["the sick note","die Krankschreibung","больничный лист"],["the printer","der Drucker","принтер"]]},{"t":"Job applications","w":[["the job advert","die Stellenanzeige","объявление о вакансии"],["the application","die Bewerbung","заявление о приёме на работу; отклик"],["to apply for a job","sich auf eine Stelle bewerben / sich um eine Stelle bewerben","откликнуться на вакансию"],["the CV","der Lebenslauf","резюме"],["the cover letter","das Anschreiben","сопроводительное письмо"],["the job interview","das Vorstellungsgespräch","собеседование"],["the employment contract","der Arbeitsvertrag","трудовой договор"],["the probation period","die Probezeit","испытательный срок"],["the notice period","die Kündigungsfrist","срок уведомления об увольнении"],["to resign (quit a job)","kündigen","уволиться"],["the work experience","die Berufserfahrung","опыт работы"],["full-time","Vollzeit","полная занятость"],["part-time","Teilzeit","частичная занятость"]]},{"t":"Media & internet","w":[["the news","die Nachrichten","новости"],["the headline","die Schlagzeile","заголовок"],["the TV licence fee","der Rundfunkbeitrag","плата за телерадиовещание"],["to download","herunterladen","скачивать"],["to upload","hochladen","загружать"],["the password","das Passwort","пароль"],["the attachment","der Anhang","вложение"],["to forward (an email)","weiterleiten","пересылать (письмо)"],["social networks","die sozialen Netzwerke","социальные сети"],["the advertising","die Werbung","реклама"],["reliable","zuverlässig","надёжный"],["the false report (fake news)","die Falschmeldung","ложное сообщение; фейк"]]}]},{"n":5,"t":"School","s":[{"t":"School system & subjects","w":[["the primary school","die Grundschule","начальная школа"],["the grammar school","das Gymnasium","гимназия"],["the school year","das Schuljahr","учебный год"],["the school report","das Zeugnis","табель; аттестат"],["the grade (mark)","die Note","оценка"],["the homework","die Hausaufgaben","домашнее задание"],["the timetable","der Stundenplan","расписание уроков"],["the subject","das Fach","предмет"],["the class test","die Klassenarbeit","контрольная работа"],["to repeat a year","sitzen bleiben / eine Klasse wiederholen","остаться на второй год"],["the class trip","die Klassenfahrt","поездка с классом"],["the school leaving exam (A levels)","das Abitur","выпускной экзамен (аттестат зрелости)"],["the school canteen","die Mensa","школьная столовая"]]},{"t":"Parents & school","w":[["the class teacher","der Klassenlehrer / die Klassenlehrerin","классный руководитель"],["the parents' evening","der Elternabend","родительское собрание"],["the parent-teacher meeting","das Elterngespräch","беседа с учителем"],["the absence note","die Entschuldigung","записка о пропуске (от родителей)"],["My son is ill today.","Mein Sohn ist heute krank.","Мой сын сегодня болен."],["the after-school care","die Nachmittagsbetreuung / der Hort","продлёнка"],["the school satchel","der Schulranzen","школьный ранец"],["the first day of school","die Einschulung","первый день в школе"],["the private tutoring","die Nachhilfe","репетиторство"],["to praise","loben","хвалить"],["the parents' representative","der Elternvertreter / die Elternvertreterin","представитель родителей"],["the consent form","die Einverständniserklärung","бланк согласия"]]}]},{"n":6,"t":"Parenting","s":[{"t":"Babies & small children","w":[["the nappy","die Windel","подгузник"],["to change a nappy","wickeln","пеленать; менять подгузник"],["the pram","der Kinderwagen","детская коляска"],["the dummy","der Schnuller","пустышка; соска"],["the baby bottle","das Fläschchen","бутылочка"],["to breastfeed","stillen","кормить грудью"],["the cot","das Kinderbett / das Gitterbett","детская кроватка"],["to teethe","zahnen","резаться (о зубах)"],["the paediatrician","der Kinderarzt / die Kinderärztin","детский врач"],["the check-up (child)","die Vorsorgeuntersuchung","профилактический осмотр"],["the vaccination","die Impfung","прививка"],["the parental leave","die Elternzeit","отпуск по уходу за ребёнком"],["the child benefit","das Kindergeld","детское пособие"]]},{"t":"Everyday family life","w":[["to bring up (raise)","erziehen","воспитывать"],["the upbringing","die Erziehung","воспитание"],["to tidy up","aufräumen","убирать (вещи)"],["the bedtime","die Schlafenszeit","время сна"],["to read aloud","vorlesen","читать вслух"],["to tell off","schimpfen / ausschimpfen","ругать"],["to set limits","Grenzen setzen","устанавливать границы"],["the tantrum","der Wutanfall","истерика; приступ гнева"],["to comfort","trösten","утешать"],["the screen time","die Bildschirmzeit","экранное время"],["the pocket money","das Taschengeld","карманные деньги"],["the siblings","die Geschwister","братья и сёстры"],["to argue","sich streiten","ссориться"]]},{"t":"Kita & childcare","w":[["the day nursery","die Kita / die Kindertagesstätte","детский сад; ясли"],["the childminder","die Tagesmutter","няня (дневная)"],["the nursery teacher","der Erzieher / die Erzieherin","воспитатель; воспитательница"],["the settling-in period","die Eingewöhnung","период адаптации"],["the waiting list","die Warteliste","лист ожидания"],["the childcare place","der Betreuungsplatz","место в детском саду"],["to pick up (a child)","abholen","забирать (ребёнка)"],["to drop off (a child)","bringen / abgeben","приводить (ребёнка)"],["the playground","der Spielplatz","детская площадка"],["the change of clothes","die Wechselkleidung","сменная одежда"],["the lunch box","die Brotdose","ланчбокс; коробка для еды"]]}]},{"n":7,"t":"Social life","s":[{"t":"Invitations & plans","w":[["to invite","einladen","приглашать"],["the invitation","die Einladung","приглашение"],["Do you fancy coming along?","Hast du Lust mitzukommen?","Хочешь пойти с нами?"],["to accept (an invitation)","zusagen","принять (приглашение)"],["to decline (an invitation)","absagen","отказаться (от приглашения)"],["to meet up","sich treffen","встречаться"],["Shall we meet at seven?","Sollen wir uns um sieben treffen?","Давай встретимся в семь?"],["I'm afraid I can't make it.","Leider schaffe ich es nicht.","К сожалению, у меня не получится."],["to bring something along","etwas mitbringen","принести что-нибудь с собой"],["the house-warming party","die Einweihungsparty","новоселье"],["the barbecue","die Grillparty","барбекю"],["I'm looking forward to it.","Ich freue mich darauf.","Я жду этого с нетерпением."]]},{"t":"Opinions & feelings","w":[["In my opinion","meiner Meinung nach","по-моему"],["I agree.","Ich stimme zu. / Das finde ich auch.","Согласен. / Я тоже так думаю."],["I see it differently.","Das sehe ich anders.","Я смотрю на это иначе."],["That depends.","Das kommt darauf an.","Это зависит от обстоятельств."],["disappointed","enttäuscht","разочарованный"],["to be annoyed","sich ärgern","злиться"],["proud","stolz","гордый"],["relieved","erleichtert","испытывающий облегчение"],["embarrassing","peinlich","неловкий; стыдный"],["jealous","eifersüchtig","ревнивый"],["to worry about","sich Sorgen machen um","беспокоиться о"],["grateful","dankbar","благодарный"],["to get used to","sich gewöhnen an","привыкать к"],["lonely","einsam","одинокий"]]},{"t":"Friendship & relationships","w":[["the acquaintance","der Bekannte / die Bekannte","знакомый; знакомая"],["the neighbour","der Nachbar / die Nachbarin","сосед; соседка"],["to get on well with","sich gut verstehen mit","хорошо ладить с"],["to trust","vertrauen","доверять"],["the relationship","die Beziehung","отношения"],["to fall in love","sich verlieben","влюбиться"],["to split up","sich trennen","расстаться"],["the argument","der Streit","ссора"],["to make up (after a fight)","sich versöhnen","помириться"],["to apologise","sich entschuldigen","извиняться"],["to keep in touch","in Kontakt bleiben","поддерживать связь"],["honest","ehrlich","честный"],["the support","die Unterstützung","поддержка"]]}]},{"n":8,"t":"Phone calls","s":[{"t":"Answering & making calls","w":[["Who's speaking, please?","Wer ist am Apparat?","Кто говорит?"],["Could I speak to Mr Huber, please?","Kann ich bitte Herrn Huber sprechen?","Можно, пожалуйста, господина Хубера?"],["One moment, please.","Einen Moment, bitte.","Минутку, пожалуйста."],["I'll put you through.","Ich verbinde Sie.","Соединяю вас."],["The line is busy.","Die Leitung ist besetzt.","Линия занята."],["He's not available right now.","Er ist gerade nicht erreichbar.","Сейчас он недоступен."],["Can you call back later?","Können Sie später zurückrufen?","Можете перезвонить позже?"],["Could you speak more slowly, please?","Könnten Sie bitte langsamer sprechen?","Говорите, пожалуйста, помедленнее."],["Could you spell that?","Können Sie das buchstabieren?","Можете продиктовать по буквам?"],["the extension (phone)","die Durchwahl","добавочный номер"],["to hang up","auflegen","повесить трубку"],["to call back","zurückrufen","перезвонить"],["the missed call","der verpasste Anruf","пропущенный звонок"]]},{"t":"Messages & appointments","w":[["the voicemail","die Mailbox / der Anrufbeantworter","голосовая почта; автоответчик"],["to leave a message","eine Nachricht hinterlassen","оставить сообщение"],["Can I take a message?","Kann ich etwas ausrichten?","Что-нибудь передать?"],["I'll pass it on.","Ich richte es aus.","Я передам."],["I'm calling about the invoice.","Ich rufe wegen der Rechnung an.","Я звоню по поводу счёта."],["I'd like to make an appointment.","Ich möchte einen Termin vereinbaren.","Я хотел бы записаться на приём."],["Do you have anything free next week?","Haben Sie nächste Woche etwas frei?","У вас есть что-нибудь свободное на следующей неделе?"],["to cancel an appointment","einen Termin absagen","отменить встречу"],["to reschedule","verschieben","перенести"],["I've got no signal.","Ich habe keinen Empfang.","У меня нет связи."],["The connection is bad.","Die Verbindung ist schlecht.","Плохая связь."]]}]},{"n":9,"t":"Public services","s":[{"t":"Registration & authorities","w":[["the citizens' office","das Bürgeramt","служба по делам граждан"],["to register your address","sich anmelden","зарегистрироваться по месту жительства"],["the registration certificate","die Meldebescheinigung","справка о регистрации"],["the residence permit","die Aufenthaltserlaubnis","разрешение на пребывание; вид на жительство"],["the immigration office","die Ausländerbehörde","ведомство по делам иностранцев"],["the form","das Formular","бланк; анкета"],["to fill in a form","ein Formular ausfüllen","заполнить бланк"],["to apply for","beantragen","подавать заявление на"],["the application (official)","der Antrag","заявление (официальное)"],["the proof","der Nachweis","подтверждение; справка"],["the signature","die Unterschrift","подпись"],["to sign","unterschreiben","подписывать"],["the tax office","das Finanzamt","налоговая"],["the tax ID","die Steuer-ID / die Steueridentifikationsnummer","налоговый номер"]]},{"t":"Health & insurance","w":[["the health insurance","die Krankenversicherung","медицинская страховка"],["the health insurance card","die Gesundheitskarte / die Versichertenkarte","карта медицинского страхования"],["the family doctor (GP)","der Hausarzt / die Hausärztin","семейный врач"],["the specialist","der Facharzt / die Fachärztin","врач-специалист"],["the referral","die Überweisung (Arzt)","направление (к врачу)"],["the prescription","das Rezept (Arzt)","рецепт (врача)"],["the pharmacy","die Apotheke","аптека"],["the waiting room","das Wartezimmer","приёмная; комната ожидания"],["the emergency department","die Notaufnahme","отделение неотложной помощи"],["the side effect","die Nebenwirkung","побочное действие"]]},{"t":"Bank, post & housing","w":[["the bank account","das Konto / das Bankkonto","банковский счёт"],["to open an account","ein Konto eröffnen","открыть счёт"],["the bank transfer","die Überweisung (Bank)","банковский перевод"],["the standing order","der Dauerauftrag","постоянное поручение"],["the parcel","das Paket","посылка"],["the registered letter","das Einschreiben","заказное письмо"],["the parcel locker","die Packstation","постамат"],["the rent","die Miete","квартплата"],["the rental deposit","die Kaution","залог за квартиру"],["the tenancy agreement","der Mietvertrag","договор аренды"],["the landlord","der Vermieter / die Vermieterin","арендодатель"],["the service charges","die Nebenkosten","коммунальные платежи"],["the caretaker","der Hausmeister / die Hausmeisterin","смотритель дома; дворник"],["to move house","umziehen","переезжать"]]}]}] },
+  top: { name: 'Everyday Essentials: Top 500 words', title: 'Everyday Essentials: Top 500 words', target: 'auto', unit: 'Topic', prefix: 'top:', data: [{"n":1,"t":"Top 100 verbs","s":[{"t":"Verbs 1–25","w":[["to be","sein","быть"],["to have","haben","иметь"],["to do","tun / machen","делать"],["to say","sagen","сказать; говорить"],["to go","gehen","идти"],["to get (receive)","bekommen","получать"],["to make","machen","делать; изготавливать"],["to know (facts)","wissen","знать"],["to know (people)","kennen","знать (кого-то)"],["to think","denken","думать"],["to take","nehmen","брать"],["to see","sehen","видеть"],["to come","kommen","приходить"],["to want","wollen","хотеть"],["to look","schauen","смотреть"],["to use","benutzen","использовать"],["to find","finden","находить"],["to give","geben","давать"],["to tell","erzählen","рассказывать"],["to work","arbeiten","работать"],["to call (phone)","anrufen","звонить"],["to try","versuchen","пытаться; пробовать"],["to ask","fragen","спрашивать"],["to need","brauchen","нуждаться; нужно"],["to feel","fühlen","чувствовать"]]},{"t":"Verbs 26–50","w":[["to become","werden","становиться"],["to leave","verlassen","уходить; покидать"],["to put","legen / stellen","класть; ставить"],["to mean","bedeuten","значить"],["to keep","behalten","хранить; оставлять себе"],["to let","lassen","позволять"],["to begin","beginnen","начинать"],["to help","helfen","помогать"],["to talk","reden","разговаривать"],["to show","zeigen","показывать"],["to hear","hören","слышать"],["to play","spielen","играть"],["to run","laufen / rennen","бегать"],["to like","mögen","любить; нравиться"],["to live","leben / wohnen","жить"],["to believe","glauben","верить"],["to hold","halten","держать"],["to bring","bringen","приносить"],["to happen","passieren","происходить"],["to write","schreiben","писать"],["to sit","sitzen","сидеть"],["to stand","stehen","стоять"],["to lose","verlieren","терять; проигрывать"],["to pay","bezahlen","платить"],["to meet","treffen","встречать"]]},{"t":"Verbs 51–75","w":[["to learn","lernen","учить; учиться"],["to change","ändern","менять"],["to understand","verstehen","понимать"],["to watch","anschauen","смотреть"],["to follow","folgen","следовать"],["to stop","aufhören","прекращать; останавливаться"],["to open","öffnen","открывать"],["to close","schließen","закрывать"],["to speak","sprechen","говорить"],["to read","lesen","читать"],["to spend (money)","ausgeben","тратить"],["to win","gewinnen","выигрывать"],["to remember","sich erinnern","помнить; вспоминать"],["to love","lieben","любить"],["to wait","warten","ждать"],["to buy","kaufen","покупать"],["to send","schicken","отправлять"],["to build","bauen","строить"],["to stay","bleiben","оставаться"],["to fall","fallen","падать"],["to sell","verkaufen","продавать"],["to decide","entscheiden","решать"],["to eat","essen","есть"],["to drink","trinken","пить"],["to sleep","schlafen","спать"]]},{"t":"Verbs 76–100","w":[["to wake up","aufwachen","просыпаться"],["to get up","aufstehen","вставать"],["to cook","kochen","готовить"],["to wash","waschen","мыть; стирать"],["to clean","putzen","убирать; чистить"],["to drive","fahren","водить; ехать"],["to fly","fliegen","летать"],["to walk","spazieren gehen / zu Fuß gehen","гулять; идти пешком"],["to swim","schwimmen","плавать"],["to sing","singen","петь"],["to laugh","lachen","смеяться"],["to cry","weinen","плакать"],["to forget","vergessen","забывать"],["to carry","tragen","нести"],["to wear","tragen / anhaben","носить (одежду)"],["to cost","kosten","стоить"],["to travel","reisen","путешествовать"],["to explain","erklären","объяснять"],["to answer","antworten","отвечать"],["to arrive","ankommen","прибывать"],["to visit","besuchen","посещать; навещать"],["to hope","hoffen","надеяться"],["to look for","suchen","искать"],["can (to be able to)","können","мочь; уметь"],["must (to have to)","müssen","быть должным; надо"]]}]},{"n":2,"t":"Top 100 nouns","s":[{"t":"Nouns 1–25","w":[["time","die Zeit","время"],["year","das Jahr","год"],["day","der Tag","день"],["week","die Woche","неделя"],["month","der Monat","месяц"],["hour","die Stunde","час"],["minute","die Minute","минута"],["morning","der Morgen","утро"],["evening","der Abend","вечер"],["night","die Nacht","ночь"],["person","die Person","человек"],["people","die Leute","люди"],["man","der Mann","мужчина"],["woman","die Frau","женщина"],["child","das Kind","ребёнок"],["friend","der Freund / die Freundin","друг; подруга"],["family","die Familie","семья"],["mother","die Mutter","мать"],["father","der Vater","отец"],["name","der Name","имя"],["house","das Haus","дом"],["flat (apartment)","die Wohnung","квартира"],["room","das Zimmer","комната"],["door","die Tür","дверь"],["window","das Fenster","окно"]]},{"t":"Nouns 26–50","w":[["table","der Tisch","стол"],["chair","der Stuhl","стул"],["bed","das Bett","кровать"],["kitchen","die Küche","кухня"],["bathroom","das Badezimmer","ванная"],["work","die Arbeit","работа"],["job","der Job / die Stelle","работа; должность"],["money","das Geld","деньги"],["school","die Schule","школа"],["city","die Stadt","город"],["country","das Land","страна"],["street","die Straße","улица"],["way","der Weg","путь; дорога"],["car","das Auto","машина"],["bus","der Bus","автобус"],["train","der Zug","поезд"],["water","das Wasser","вода"],["food","das Essen","еда"],["bread","das Brot","хлеб"],["coffee","der Kaffee","кофе"],["tea","der Tee","чай"],["milk","die Milch","молоко"],["meat","das Fleisch","мясо"],["fruit","das Obst","фрукты"],["vegetables","das Gemüse","овощи"]]},{"t":"Nouns 51–75","w":[["shop","der Laden / das Geschäft","магазин"],["price","der Preis","цена"],["thing","das Ding / die Sache","вещь"],["problem","das Problem","проблема"],["question","die Frage","вопрос"],["answer","die Antwort","ответ"],["idea","die Idee","идея"],["word","das Wort","слово"],["language","die Sprache","язык"],["book","das Buch","книга"],["phone","das Telefon / das Handy","телефон"],["computer","der Computer","компьютер"],["number","die Zahl / die Nummer","число; номер"],["place","der Ort / der Platz","место"],["world","die Welt","мир"],["life","das Leben","жизнь"],["body","der Körper","тело"],["head","der Kopf","голова"],["hand","die Hand","рука; кисть"],["eye","das Auge","глаз"],["health","die Gesundheit","здоровье"],["doctor","der Arzt / die Ärztin","врач"],["weather","das Wetter","погода"],["sun","die Sonne","солнце"],["rain","der Regen","дождь"]]},{"t":"Nouns 76–100","w":[["air","die Luft","воздух"],["dog","der Hund","собака"],["cat","die Katze","кошка"],["tree","der Baum","дерево"],["music","die Musik","музыка"],["game","das Spiel","игра"],["holiday","der Urlaub","отпуск; каникулы"],["birthday","der Geburtstag","день рождения"],["party","die Party / die Feier","вечеринка; праздник"],["car park","der Parkplatz","парковка"],["station","der Bahnhof","вокзал"],["ticket","die Fahrkarte / das Ticket","билет"],["key","der Schlüssel","ключ"],["bag","die Tasche","сумка"],["clothes","die Kleidung","одежда"],["shoe","der Schuh","ботинок; туфля"],["colour","die Farbe","цвет"],["picture","das Bild","картина; изображение"],["story","die Geschichte","история; рассказ"],["news","die Nachrichten","новости"],["end","das Ende","конец"],["beginning","der Anfang","начало"],["side","die Seite","сторона"],["part","der Teil","часть"],["home","das Zuhause","дом (родной)"]]}]},{"n":3,"t":"Top 100 adjectives","s":[{"t":"Adjectives 1–25","w":[["good","gut","хороший"],["bad","schlecht","плохой"],["big","groß","большой"],["small","klein","маленький"],["new","neu","новый"],["old","alt","старый"],["young","jung","молодой"],["long","lang","длинный"],["short","kurz","короткий"],["high","hoch","высокий"],["low","niedrig","низкий"],["right (correct)","richtig","правильный"],["wrong","falsch","неправильный"],["important","wichtig","важный"],["easy","einfach / leicht","лёгкий; простой"],["difficult","schwierig / schwer","трудный"],["fast","schnell","быстрый"],["slow","langsam","медленный"],["early","früh","ранний; рано"],["late","spät","поздний; поздно"],["hot","heiß","горячий; жаркий"],["cold","kalt","холодный"],["warm","warm","тёплый"],["cheap","billig / günstig","дешёвый"],["expensive","teuer","дорогой"]]},{"t":"Adjectives 26–50","w":[["beautiful","schön","красивый"],["ugly","hässlich","некрасивый"],["happy","glücklich","счастливый"],["sad","traurig","грустный"],["tired","müde","усталый"],["hungry","hungrig","голодный"],["thirsty","durstig","испытывающий жажду"],["ill (sick)","krank","больной"],["healthy","gesund","здоровый"],["full","voll","полный"],["empty","leer","пустой"],["open","offen","открытый"],["closed","geschlossen","закрытый"],["free (no cost)","kostenlos","бесплатный"],["free (not busy)","frei","свободный"],["busy","beschäftigt","занятый"],["ready","fertig / bereit","готовый"],["possible","möglich","возможный"],["different","anders / verschieden","другой; разный"],["same","gleich","одинаковый; тот же"],["next","nächste","следующий"],["last","letzte","последний"],["first","erste","первый"],["whole","ganz","целый"],["real","echt","настоящий"]]},{"t":"Adjectives 51–75","w":[["true","wahr","верный; правдивый"],["clear","klar","ясный"],["sure","sicher","уверенный"],["safe","sicher","безопасный"],["dangerous","gefährlich","опасный"],["quiet","ruhig / leise","тихий"],["loud","laut","громкий"],["clean","sauber","чистый"],["dirty","schmutzig","грязный"],["nice (person)","nett","милый; приятный"],["friendly","freundlich","дружелюбный"],["funny","lustig","смешной"],["interesting","interessant","интересный"],["boring","langweilig","скучный"],["strong","stark","сильный"],["weak","schwach","слабый"],["heavy","schwer","тяжёлый"],["light (weight)","leicht","лёгкий (по весу)"],["dark","dunkel","тёмный"],["bright","hell","светлый"],["near","nah","близкий"],["far","weit","далёкий"],["rich","reich","богатый"],["poor","arm","бедный"],["wet","nass","мокрый"]]},{"t":"Adjectives 76–100","w":[["dry","trocken","сухой"],["soft","weich","мягкий"],["hard","hart","твёрдый"],["sweet","süß","сладкий"],["salty","salzig","солёный"],["delicious","lecker","вкусный"],["famous","berühmt","знаменитый"],["popular","beliebt","популярный"],["normal","normal","обычный"],["special","besonders","особенный"],["polite","höflich","вежливый"],["own","eigene","собственный"],["favourite","Lieblings-","любимый"],["correct","korrekt","правильный; корректный"],["angry","wütend","злой; сердитый"],["fearful","ängstlich","боязливый; пугливый"],["proud","stolz","гордый"],["bored","gelangweilt","скучающий"],["lonely","einsam","одинокий"],["married","verheiratet","женатый; замужем"],["single (not married)","ledig","холостой; не замужем"],["alone","allein","один; в одиночестве"],["together","zusammen","вместе"],["fresh","frisch","свежий"],["modern","modern","современный"]]}]},{"n":4,"t":"Top 100 small words","s":[{"t":"Small words 1–25","w":[["I","ich","я"],["you (informal)","du","ты"],["he","er","он"],["she","sie","она"],["it","es","оно"],["we","wir","мы"],["they","sie","они"],["you (formal)","Sie","вы"],["this","dieser / diese / dieses","этот; эта; это"],["that","das","то; это"],["here","hier","здесь"],["there","dort / da","там"],["now","jetzt","сейчас"],["then","dann","потом; тогда"],["today","heute","сегодня"],["tomorrow","morgen","завтра"],["yesterday","gestern","вчера"],["always","immer","всегда"],["often","oft","часто"],["sometimes","manchmal","иногда"],["never","nie","никогда"],["already","schon","уже"],["still","noch","ещё; всё ещё"],["soon","bald","скоро"],["again","wieder","снова"]]},{"t":"Small words 26–50","w":[["very","sehr","очень"],["too (as in too big)","zu","слишком"],["also","auch","тоже; также"],["only","nur","только"],["almost","fast","почти"],["maybe","vielleicht","может быть"],["really","wirklich","действительно"],["yes","ja","да"],["no","nein","нет"],["not","nicht","не"],["and","und","и"],["or","oder","или"],["but","aber","но"],["because","weil","потому что"],["if","wenn / falls","если"],["when (question)","wann","когда"],["what","was","что"],["who","wer","кто"],["where","wo","где"],["where to","wohin","куда"],["where from","woher","откуда"],["why","warum","почему"],["how","wie","как"],["how much","wie viel","сколько"],["which","welcher / welche / welches","какой; который"]]},{"t":"Small words 51–75","w":[["in","in","в"],["on","auf","на"],["under","unter","под"],["over","über","над; через"],["next to","neben","рядом с"],["between","zwischen","между"],["behind","hinter","за; позади"],["in front of","vor","перед"],["with","mit","с"],["without","ohne","без"],["for","für","для"],["from","von / aus","от; из"],["to (a place)","nach / zu","в; к"],["at (a time)","um","в (о времени)"],["before","vor","до; перед"],["after","nach","после"],["during","während","во время"],["until","bis","до (каких-то пор)"],["since","seit","с (каких-то пор)"],["about","über","о; про"],["all","alle","все"],["everything","alles","всё"],["nothing","nichts","ничего"],["something","etwas","что-то"],["someone","jemand","кто-то"]]},{"t":"Small words 76–100","w":[["nobody","niemand","никто"],["everyone","jeder","каждый; все"],["many","viele","много (исчисл.)"],["much","viel","много"],["a little","ein bisschen / wenig","немного"],["more","mehr","больше"],["less","weniger","меньше"],["enough","genug","достаточно"],["each","jeder / jede / jedes","каждый"],["other","andere","другой"],["both","beide","оба"],["some","einige","некоторые; несколько"],["my","mein / meine","мой"],["your (informal)","dein / deine","твой"],["his","sein / seine","его"],["her","ihr / ihre","её"],["our","unser / unsere","наш"],["their","ihr / ihre","их"],["up","oben / hinauf","вверх; наверху"],["down","unten / hinunter","вниз; внизу"],["inside","drinnen","внутри"],["outside","draußen","снаружи"],["left","links","налево; слева"],["right","rechts","направо; справа"],["straight on","geradeaus","прямо"]]}]},{"n":5,"t":"Top 100 phrases","s":[{"t":"Phrases 1–25","w":[["Hello!","Hallo!","Привет!"],["Good morning!","Guten Morgen!","Доброе утро!"],["Good evening!","Guten Abend!","Добрый вечер!"],["Good night!","Gute Nacht!","Спокойной ночи!"],["Goodbye!","Auf Wiedersehen!","До свидания!"],["Bye!","Tschüss!","Пока!"],["See you later!","Bis später!","До встречи!"],["See you tomorrow!","Bis morgen!","До завтра!"],["How are you?","Wie geht es dir?","Как дела?"],["I'm fine, thanks.","Mir geht es gut, danke.","Хорошо, спасибо."],["And you?","Und dir?","А у тебя?"],["Nice to meet you.","Freut mich.","Приятно познакомиться."],["My name is …","Ich heiße …","Меня зовут …"],["What's your name?","Wie heißt du?","Как тебя зовут?"],["Where are you from?","Woher kommst du?","Откуда ты?"],["I'm from …","Ich komme aus …","Я из …"],["Please.","Bitte.","Пожалуйста."],["Thank you!","Danke!","Спасибо!"],["Thank you very much!","Vielen Dank!","Большое спасибо!"],["You're welcome.","Gern geschehen.","Не за что."],["Excuse me.","Entschuldigung.","Извините."],["I'm sorry.","Es tut mir leid.","Мне жаль."],["No problem.","Kein Problem.","Без проблем."],["Yes, please.","Ja, bitte.","Да, пожалуйста."],["No, thank you.","Nein, danke.","Нет, спасибо."]]},{"t":"Phrases 26–50","w":[["Of course!","Natürlich!","Конечно!"],["OK.","In Ordnung.","Хорошо. / Ладно."],["I don't know.","Ich weiß nicht.","Я не знаю."],["I don't understand.","Ich verstehe nicht.","Я не понимаю."],["Can you repeat that, please?","Kannst du das bitte wiederholen?","Повтори, пожалуйста."],["Can you speak more slowly?","Kannst du langsamer sprechen?","Можешь говорить помедленнее?"],["What does that mean?","Was bedeutet das?","Что это значит?"],["How do you say that in German?","Wie sagt man das auf Deutsch?","Как это сказать по-немецки?"],["Do you speak English?","Sprichst du Englisch?","Ты говоришь по-английски?"],["I speak a little German.","Ich spreche ein bisschen Deutsch.","Я немного говорю по-немецки."],["Can you help me?","Kannst du mir helfen?","Можешь мне помочь?"],["Where is the toilet?","Wo ist die Toilette?","Где туалет?"],["How much does it cost?","Wie viel kostet das?","Сколько это стоит?"],["I would like …","Ich möchte …","Я хотел(а) бы …"],["I need …","Ich brauche …","Мне нужно …"],["Do you have …?","Haben Sie …?","У вас есть …?"],["The bill, please.","Die Rechnung, bitte.","Счёт, пожалуйста."],["Can I pay by card?","Kann ich mit Karte zahlen?","Можно оплатить картой?"],["Cheers!","Prost!","Будем здоровы!"],["Enjoy your meal!","Guten Appetit!","Приятного аппетита!"],["It's delicious.","Es schmeckt gut.","Очень вкусно."],["What time is it?","Wie spät ist es?","Который час?"],["When does it start?","Wann fängt es an?","Когда это начинается?"],["I'm late.","Ich bin spät dran.","Я опаздываю."],["Wait a moment.","Warte kurz.","Подожди минутку."]]},{"t":"Phrases 51–75","w":[["Let's go!","Los geht's!","Пошли!"],["Come in!","Komm herein!","Входи!"],["Sit down, please.","Setz dich, bitte.","Садись, пожалуйста."],["Be careful!","Pass auf!","Осторожно!"],["Help!","Hilfe!","Помогите!"],["I'm hungry.","Ich habe Hunger.","Я голоден. / Я голодна."],["I'm thirsty.","Ich habe Durst.","Я хочу пить."],["I'm tired.","Ich bin müde.","Я устал. / Я устала."],["I feel ill.","Ich fühle mich krank.","Я плохо себя чувствую."],["I like it.","Das gefällt mir.","Мне нравится."],["I don't like it.","Das gefällt mir nicht.","Мне не нравится."],["I think so.","Ich glaube schon.","Думаю, да."],["I don't think so.","Ich glaube nicht.","Не думаю."],["That's right.","Das stimmt.","Верно."],["That's true.","Das ist wahr.","Это правда."],["Really?","Wirklich?","Правда?"],["Great!","Super!","Отлично!"],["Good idea!","Gute Idee!","Хорошая идея!"],["Never mind.","Macht nichts.","Ничего страшного."],["It doesn't matter.","Das ist egal.","Это не важно."],["Good luck!","Viel Glück!","Удачи!"],["Have fun!","Viel Spaß!","Хорошо провести время!"],["Happy birthday!","Alles Gute zum Geburtstag!","С днём рождения!"],["Congratulations!","Herzlichen Glückwunsch!","Поздравляю!"],["Get well soon!","Gute Besserung!","Выздоравливай!"]]},{"t":"Phrases 76–100","w":[["Have a nice day!","Schönen Tag noch!","Хорошего дня!"],["Same to you!","Gleichfalls!","И тебе того же!"],["Welcome!","Willkommen!","Добро пожаловать!"],["What's wrong?","Was ist los?","Что случилось?"],["Everything is fine.","Alles ist gut.","Всё в порядке."],["Don't worry.","Keine Sorge.","Не волнуйся."],["I love you.","Ich liebe dich.","Я тебя люблю."],["I miss you.","Ich vermisse dich.","Я скучаю по тебе."],["Call me!","Ruf mich an!","Позвони мне!"],["Where are you?","Wo bist du?","Где ты?"],["I'm on my way.","Ich bin unterwegs.","Я уже в пути."],["I'll be right there.","Ich komme gleich.","Сейчас буду."],["What are you doing?","Was machst du?","Что ты делаешь?"],["Do you have time?","Hast du Zeit?","У тебя есть время?"],["See you soon!","Bis bald!","До скорого!"],["Take care!","Pass auf dich auf!","Береги себя!"],["Sleep well!","Schlaf gut!","Сладких снов!"],["Good job!","Gut gemacht!","Молодец!"],["Hurry up!","Beeil dich!","Поторопись!"],["Just a moment, please.","Einen Moment, bitte.","Минутку, пожалуйста."],["How was your day?","Wie war dein Tag?","Как прошёл твой день?"],["What do you think?","Was meinst du?","Как ты думаешь?"],["Why not?","Warum nicht?","Почему бы и нет?"],["It depends.","Das kommt darauf an.","Смотря по обстоятельствам."],["Here you are.","Bitte schön.","Вот, пожалуйста."]]}]}] }
+};
+// ---------- data ----------
+// ---------- localisation ----------
+const I18N = {
+  en: {
+    language: 'Language', theme: 'Theme', th_classic: 'Classic', th_light: 'Modern light', th_dark: 'Modern dark', modes: 'Modes',
+    nav_browse: 'Word list', nav_learn: 'Flashcards', nav_quiz: 'Choice test', nav_write: 'Write test', nav_stats: 'Statistics',
+    direction: 'Direction', 'dir_en-de': 'English → German', 'dir_de-en': 'German → English', dir_mix: 'Mixed', mixedDirs: 'Mixed directions',
+    perRound: 'Words per round', allSel: 'All selected', readWords: 'Read words aloud', weakFirst: 'Weakest words first',
+    course: 'Course', topics: 'Topics', selectAll: 'Select all', clear: 'Clear', expand: 'Expand',
+    L_en: 'English', L_de: 'German', u_Unit: 'Unit', u_Topic: 'Topic', u_Part: 'Part',
+    selected: (n, t) => `${n} of ${t} words selected`, learnedOf: (m, n) => `Learned: ${m} / ${n}`, level: (b, m) => `Level ${b} of ${m}`,
+    emptyT: 'No words selected', emptyP: 'Tick at least one topic in the Topics list to start.',
+    search: 'Search words', colLevel: 'Level', noMatch: 'No words match your search.', tickTopic: 'Tick a topic in the Topics list to see its words.',
+    shown: n => `${n} shown`, readAloud: 'Read aloud', round: 'Round', score: n => `Score ${n}`,
+    perfect: 'Perfect round!', veryGood: 'Very good. A few words need another look.', goodStart: 'Good start. Repeat the round to lock the words in.', newWords: 'These words are new for you. Run the round again.',
+    rightOf: (r, t, p) => `${r} / ${t} right (${p}%)`, newRound: 'Start new round', seeStats: 'See statistics',
+    doneLearn: 'Flashcards finished', doneQuiz: 'Choice test finished', doneWrite: 'Write test finished',
+    dontKnow: '✗ Didn’t know', knew: '✓ Knew it', showAns: 'Show answer', keysLearn: 'Keys: 1 = didn’t know, 2 = knew it', keySpace: 'Key: Space shows the answer',
+    next: 'Next question', keysQuiz: 'Keys: 1–4 choose, Enter goes on', tapNext: 'Tap anywhere to continue',
+    typeIn_en: 'Type the answer in English', typeIn_de: 'Type the answer in German', check: 'Check', nextWord: 'Next word',
+    writeHint: 'Enter checks your answer, Enter again goes on. You can write ae/oe/ue/ss for ä/ö/ü/ß.',
+    typeFirst: 'Type your answer, or press Check again to see the solution.',
+    rightArticle: 'Right, but don’t forget the article:', right: 'Right!', answerIs: 'The answer is', override: 'Count my answer as right', counted: 'Counted as right:',
+    boxNames: ['New', 'Level 1', 'Level 2', 'Level 3', 'Level 4', 'Learned'],
+    statWords: 'Words in collection', practised: 'Practised', learned: 'Learned', accuracy: 'Answers right', progressBy: 'Progress by topic',
+    learnedAria: (l, n) => `${l} of ${n} learned`, levelsHint: 'Each right answer moves a word up one level. A wrong answer sends it back to level 1. Words at level 5 count as learned.',
+    missMost: 'Words you miss most', missed: 'Missed', nothingYet: 'Nothing yet. Take a test and your trickiest words show up here.',
+    reset: 'Reset all progress', resetYes: 'Yes, reset everything', resetWarn: 'This erases all levels and scores.',
+    noTyping: 'This mode has no typing. To type your answers, use'
+  },
+  de: {
+    language: 'Sprache', theme: 'Design', th_classic: 'Klassisch', th_light: 'Modern hell', th_dark: 'Modern dunkel', modes: 'Modi',
+    nav_browse: 'Wortliste', nav_learn: 'Karteikarten', nav_quiz: 'Auswahltest', nav_write: 'Schreibtest', nav_stats: 'Statistik',
+    direction: 'Richtung', 'dir_en-de': 'Englisch → Deutsch', 'dir_de-en': 'Deutsch → Englisch', dir_mix: 'Gemischt', mixedDirs: 'Gemischte Richtungen',
+    perRound: 'Wörter pro Runde', allSel: 'Alle ausgewählten', readWords: 'Wörter vorlesen', weakFirst: 'Schwierigste zuerst',
+    course: 'Kurs', topics: 'Themen', selectAll: 'Alle auswählen', clear: 'Leeren', expand: 'Aufklappen',
+    L_en: 'Englisch', L_de: 'Deutsch', u_Unit: 'Unit', u_Topic: 'Thema', u_Part: 'Teil',
+    selected: (n, t) => `${n} von ${t} Wörtern ausgewählt`, learnedOf: (m, n) => `Gelernt: ${m} / ${n}`, level: (b, m) => `Stufe ${b} von ${m}`,
+    emptyT: 'Keine Wörter ausgewählt', emptyP: 'Hake mindestens ein Thema in der Themenliste an, um zu starten.',
+    search: 'Wörter suchen', colLevel: 'Stufe', noMatch: 'Keine Treffer für deine Suche.', tickTopic: 'Hake ein Thema an, um seine Wörter zu sehen.',
+    shown: n => `${n} angezeigt`, readAloud: 'Vorlesen', round: 'Runde', score: n => `Punkte: ${n}`,
+    perfect: 'Perfekte Runde!', veryGood: 'Sehr gut. Ein paar Wörter brauchen noch Übung.', goodStart: 'Guter Anfang. Wiederhole die Runde, damit die Wörter sitzen.', newWords: 'Diese Wörter sind neu für dich. Mach die Runde noch einmal.',
+    rightOf: (r, t, p) => `${r} / ${t} richtig (${p} %)`, newRound: 'Neue Runde starten', seeStats: 'Statistik ansehen',
+    doneLearn: 'Karteikarten fertig', doneQuiz: 'Auswahltest fertig', doneWrite: 'Schreibtest fertig',
+    dontKnow: '✗ Wusste ich nicht', knew: '✓ Wusste ich', showAns: 'Antwort zeigen', keysLearn: 'Tasten: 1 = wusste ich nicht, 2 = wusste ich', keySpace: 'Taste: Leertaste zeigt die Antwort',
+    next: 'Nächste Frage', keysQuiz: 'Tasten: 1–4 wählen, Enter geht weiter', tapNext: 'Tippe irgendwo, um weiterzumachen',
+    typeIn_en: 'Antwort auf Englisch eingeben', typeIn_de: 'Antwort auf Deutsch eingeben', check: 'Prüfen', nextWord: 'Nächstes Wort',
+    writeHint: 'Enter prüft die Antwort, nochmal Enter geht weiter. Statt ä/ö/ü/ß kannst du ae/oe/ue/ss schreiben.',
+    typeFirst: 'Gib deine Antwort ein oder drücke nochmal auf Prüfen, um die Lösung zu sehen.',
+    rightArticle: 'Richtig, aber vergiss den Artikel nicht:', right: 'Richtig!', answerIs: 'Die richtige Antwort ist', override: 'Meine Antwort als richtig zählen', counted: 'Als richtig gezählt:',
+    boxNames: ['Neu', 'Stufe 1', 'Stufe 2', 'Stufe 3', 'Stufe 4', 'Gelernt'],
+    statWords: 'Wörter in der Sammlung', practised: 'Geübt', learned: 'Gelernt', accuracy: 'Richtige Antworten', progressBy: 'Fortschritt nach Thema',
+    learnedAria: (l, n) => `${l} von ${n} gelernt`, levelsHint: 'Jede richtige Antwort bringt ein Wort eine Stufe höher. Eine falsche Antwort setzt es auf Stufe 1 zurück. Wörter auf Stufe 5 gelten als gelernt.',
+    missMost: 'Deine schwierigsten Wörter', missed: 'Fehler', nothingYet: 'Noch nichts. Mach einen Test, dann erscheinen hier deine schwierigsten Wörter.',
+    reset: 'Gesamten Fortschritt löschen', resetYes: 'Ja, alles löschen', resetWarn: 'Damit werden alle Stufen und Ergebnisse gelöscht.',
+    noTyping: 'In diesem Modus wird nichts getippt. Zum Eintippen nutze den'
+  },
+  ru: {
+    language: 'Язык', theme: 'Оформление', th_classic: 'Классика', th_light: 'Современная светлая', th_dark: 'Современная тёмная', modes: 'Режимы',
+    nav_browse: 'Список слов', nav_learn: 'Карточки', nav_quiz: 'Тест с вариантами', nav_write: 'Письменный тест', nav_stats: 'Статистика',
+    direction: 'Направление', 'dir_en-de': 'Английский → Немецкий', 'dir_de-en': 'Немецкий → Английский', dir_mix: 'Вперемешку', mixedDirs: 'Оба направления',
+    perRound: 'Слов в раунде', allSel: 'Все выбранные', readWords: 'Читать слова вслух', weakFirst: 'Сначала трудные',
+    course: 'Курс', topics: 'Темы', selectAll: 'Выбрать все', clear: 'Снять', expand: 'Развернуть',
+    L_en: 'Английский', L_de: 'Немецкий', u_Unit: 'Урок', u_Topic: 'Тема', u_Part: 'Часть',
+    selected: (n, t) => `Выбрано слов: ${n} из ${t}`, learnedOf: (m, n) => `Выучено: ${m} / ${n}`, level: (b, m) => `Уровень ${b} из ${m}`,
+    emptyT: 'Слова не выбраны', emptyP: 'Отметьте хотя бы одну тему в списке «Темы», чтобы начать.',
+    search: 'Поиск слов', colLevel: 'Уровень', noMatch: 'По вашему запросу ничего не найдено.', tickTopic: 'Отметьте тему, чтобы увидеть её слова.',
+    shown: n => `Показано: ${n}`, readAloud: 'Прочитать вслух', round: 'Раунд', score: n => `Очки: ${n}`,
+    perfect: 'Идеальный раунд!', veryGood: 'Очень хорошо. Некоторые слова стоит повторить.', goodStart: 'Хорошее начало. Повторите раунд, чтобы слова запомнились.', newWords: 'Эти слова для вас новые. Пройдите раунд ещё раз.',
+    rightOf: (r, t, p) => `Верно: ${r} из ${t} (${p}%)`, newRound: 'Новый раунд', seeStats: 'Открыть статистику',
+    doneLearn: 'Карточки пройдены', doneQuiz: 'Тест с вариантами завершён', doneWrite: 'Письменный тест завершён',
+    dontKnow: '✗ Не знал(а)', knew: '✓ Знал(а)', showAns: 'Показать ответ', keysLearn: 'Клавиши: 1 — не знал(а), 2 — знал(а)', keySpace: 'Клавиша: пробел показывает ответ',
+    next: 'Следующий вопрос', keysQuiz: 'Клавиши: 1–4 — выбор, Enter — дальше', tapNext: 'Нажмите в любом месте, чтобы продолжить',
+    typeIn_en: 'Введите ответ по-английски', typeIn_de: 'Введите ответ по-немецки', check: 'Проверить', nextWord: 'Следующее слово',
+    writeHint: 'Enter — проверить, ещё раз Enter — дальше. Вместо ä/ö/ü/ß можно писать ae/oe/ue/ss.',
+    typeFirst: 'Введите ответ или ещё раз нажмите «Проверить», чтобы увидеть решение.',
+    rightArticle: 'Верно, но не забудьте артикль:', right: 'Верно!', answerIs: 'Правильный ответ:', override: 'Засчитать мой ответ', counted: 'Засчитано:',
+    boxNames: ['Новые', 'Уровень 1', 'Уровень 2', 'Уровень 3', 'Уровень 4', 'Выучено'],
+    statWords: 'Слов в коллекции', practised: 'Повторено', learned: 'Выучено', accuracy: 'Верных ответов', progressBy: 'Прогресс по темам',
+    learnedAria: (l, n) => `Выучено ${l} из ${n}`, levelsHint: 'Каждый верный ответ поднимает слово на уровень выше. Ошибка возвращает его на уровень 1. Слова на уровне 5 считаются выученными.',
+    missMost: 'Самые трудные слова', missed: 'Ошибок', nothingYet: 'Пока пусто. Пройдите тест — здесь появятся самые трудные слова.',
+    reset: 'Сбросить весь прогресс', resetYes: 'Да, сбросить всё', resetWarn: 'Все уровни и результаты будут удалены.',
+    noTyping: 'В этом режиме ничего вводить не нужно. Чтобы вводить ответы, откройте'
+  }
+};
+const T = (k, ...a) => { const d = I18N[opts.lang] || I18N.en; const v = k in d ? d[k] : I18N.en[k]; return typeof v === 'function' ? v(...a) : v; };
+function applyLang() {
+  document.documentElement.lang = opts.lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = T(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-aria]').forEach(el => el.setAttribute('aria-label', T(el.dataset.i18nAria)));
+  document.getElementById('lang').value = opts.lang;
+}
+Object.assign(I18N.en, { appName: 'Sake Maki Trainer', L_ru: 'Russian', typeIn_ru: 'Type the answer in Russian', enterHint: 'Enter checks your answer, Enter again goes on.', umlautHint: 'You can write ae/oe/ue/ss for ä/ö/ü/ß.' });
+Object.assign(I18N.de, { appName: 'Sake Maki Trainer', L_ru: 'Russisch', typeIn_ru: 'Antwort auf Russisch eingeben', enterHint: 'Enter prüft die Antwort, nochmal Enter geht weiter.', umlautHint: 'Statt ä/ö/ü/ß kannst du ae/oe/ue/ss schreiben.' });
+Object.assign(I18N.ru, { appName: 'Сяке-Маки тренажер', L_ru: 'Русский', typeIn_ru: 'Введите ответ по-русски', enterHint: 'Enter — проверить, ещё раз Enter — дальше.', umlautHint: 'Вместо ä/ö/ü/ß можно писать ae/oe/ue/ss.' });
+
+let C, DATA, WORDS, BYID;
+const LANGS = ['en', 'de', 'ru'];
+const VOICE = { en: 'en-GB', de: 'de-DE', ru: 'ru-RU' };
+function loadCourse(key) {
+  C = COURSES[key] || COURSES.more1; DATA = C.data; WORDS = [];
+  DATA.forEach(u => u.s.forEach((s, si) => s.w.forEach((w, wi) => {
+    WORDS.push({ id: `${C.prefix}${u.n}-${si}-${wi}`, en: w[0], de: w[1], ru: w[2] || '', unit: u.n, ut: u.t, sec: `${u.n}.${si}`, st: s.t });
+  })));
+  BYID = Object.fromEntries(WORDS.map(w => [w.id, w]));
+}
+const MAXBOX = 5;
+
+// ---------- storage ----------
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('ezmb:' + k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('ezmb:' + k, JSON.stringify(v)); } catch (e) {} }
+};
+const navLang = (navigator.language || 'en').slice(0, 2).toLowerCase();
+let prog = store.get('progress', {});
+let opts = Object.assign({ dir: 'en-de', size: '20', autospeak: false, weak: true, view: 'learn', course: 'more1', ui: 'classic', lang: ['de', 'ru'].includes(navLang) ? navLang : 'en' }, store.get('opts', {}));
+if (opts.ui === 'modern') opts.ui = 'light';
+if (opts.dir === 'mix') opts.dir = 'en~de';
+let sel;
+const selKey = () => opts.course === 'more1' ? 'sel' : 'sel:' + opts.course;
+function useCourse(key) {
+  opts.course = COURSES[key] ? key : 'more1'; loadCourse(opts.course);
+  sel = new Set(store.get(selKey(), DATA.flatMap(u => u.s.map((s, i) => `${u.n}.${i}`))));
+}
+useCourse(opts.course);
+const P = id => prog[id] || (prog[id] = { box: 0, right: 0, wrong: 0 });
+function mark(id, ok) {
+  const p = P(id);
+  if (ok) { p.right++; p.box = Math.min(MAXBOX, p.box + 1); }
+  else { p.wrong++; p.box = 1; }
+  p.last = Date.now();
+  store.set('progress', prog);
+  status();
+}
+
+// ---------- helpers ----------
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const pool = () => WORDS.filter(w => sel.has(w.sec));
+function pickRound() {
+  let p = shuffle(pool().slice());
+  if (opts.weak) p.sort((a, b) => (P(a.id).box - P(b.id).box) || ((P(a.id).last || 0) - (P(b.id).last || 0)));
+  const n = +opts.size;
+  return n ? p.slice(0, n) : p;
+}
+const DIRS = ['en-de', 'de-en', 'en-ru', 'ru-en', 'de-ru', 'ru-de', 'en~de', 'en~ru', 'de~ru'];
+function dirLabel(d) {
+  const [a, b] = d.split(/[-~]/);
+  return `${T('L_' + a)} ${d.includes('~') ? '⇄' : '→'} ${T('L_' + b)}`;
+}
+function side(w) {
+  let [from, to] = opts.dir.split(/[-~]/);
+  if (opts.dir.includes('~') && Math.random() < .5) [from, to] = [to, from];
+  return { q: w[from], a: w[to], qk: from, key: to, qlang: VOICE[from], alang: VOICE[to], qtarget: from === targetLang() };
+}
+let voices = [];
+function loadVoices() { try { voices = speechSynthesis.getVoices(); } catch (e) {} }
+try { if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; } } catch (e) {}
+function speak(text, lang) {
+  try {
+    if (!('speechSynthesis' in window) || !text) return;
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text.replace(/\(.*?\)/g, ''));
+    u.lang = lang; u.rate = .9;
+    const v = voices.find(v => v.lang.replace('_', '-') === lang) || voices.find(v => v.lang.startsWith(lang.slice(0, 2)));
+    if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+const targetLang = () => C.target === 'auto' ? opts.dir.split(/[-~]/)[1] : C.target;
+const sayTarget = w => speak(w[targetLang()], VOICE[targetLang()]);
+
+// answer checking
+function norm(s) {
+  return s.toLowerCase().replace(/[’‘`´]/g, "'").replace(/\(.*?\)/g, '')
+    .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/ё/g, 'е')
+    .replace(/[.!?,;:"„“”«»'—–…]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+const SUFFIX = new Set(['e', 'r', 's', 'n', 'in', 'en', 'er', 'innen']);
+// "dir/Ihnen/euch" -> each word; "Pirat/in", "nächste/r/s" -> base + endings
+function slashForms(tok) {
+  if (!tok.includes('/') || /^\/|\/$/.test(tok)) return [tok];
+  const parts = tok.split('/');
+  const base = parts[0];
+  if (parts.slice(1).every(x => SUFFIX.has(x.toLowerCase()))) return [base, ...parts.slice(1).map(x => base + x)];
+  return parts;
+}
+function expandSlashes(phrase) {
+  let combos = [''];
+  for (const tok of phrase.split(' ')) {
+    const forms = slashForms(tok);
+    combos = combos.flatMap(c => forms.map(f => (c ? c + ' ' : '') + f));
+    if (combos.length > 64) return [phrase];
+  }
+  return combos;
+}
+function variants(expected) {
+  const out = new Set([expected]);
+  expected.split(/\s*;\s*|\s+\/\s+/).forEach(p => {
+    out.add(p);
+    expandSlashes(p.replace(/\(.*?\)/g, '').replace(/\s+/g, ' ').trim()).forEach(v => out.add(v));
+    // optional parts in brackets: accept with and without them, e.g. "Lasst (uns)", "(mit-)bringen"
+    expandSlashes(p.replace(/[()]/g, '').replace(/-\s*(?=\p{L})/u, '').replace(/\s+/g, ' ').trim()).forEach(v => out.add(v));
+  });
+  const res = new Set();
+  out.forEach(v => { const n = norm(v); if (n) { res.add(n); res.add(n.replace(/^to /, '')); res.add(n.replace(/^(the|a|an|der|die|das) /, '')); } });
+  return res;
+}
+function isCorrect(input, expected) {
+  const v = variants(expected);
+  const n = norm(input);
+  if (!n) return false;
+  const tries = [n, n.replace(/^(to|der|die|das|ein|eine|a|an|the) /, '')];
+  return tries.some(t => v.has(t) || v.has('to ' + t));
+}
+
+// ---------- tree ----------
+const UW = () => T('u_' + C.unit);
+function buildTree() {
+  const t = $('#tree');
+  t.innerHTML = '<ul>' + DATA.map(u => `
+    <li data-u="${u.n}">
+      <div class="node"><button class="exp" aria-label="${T('expand')}: ${UW()} ${u.n}" aria-expanded="false" data-exp="${u.n}">+</button>
+        <label><input type="checkbox" data-unit="${u.n}"><span class="lbl">${UW()} ${u.n}: ${esc(u.t)}</span></label></div>
+      <ul hidden>${u.s.map((s, i) => `<li><div class="node"><label><input type="checkbox" data-sec="${u.n}.${i}">
+        <span class="lbl">${esc(s.t)}</span><span class="cnt">(${s.w.length})</span></label></div></li>`).join('')}</ul>
+    </li>`).join('') + '</ul>';
+  syncTree();
+}
+function treeEvents() {
+  const t = $('#tree');
+  t.addEventListener('click', e => {
+    const b = e.target.closest('[data-exp]'); if (!b) return;
+    const ul = b.closest('li').querySelector('ul'); ul.hidden = !ul.hidden;
+    b.textContent = ul.hidden ? '+' : '−'; b.setAttribute('aria-expanded', !ul.hidden);
+  });
+  t.addEventListener('change', e => {
+    const c = e.target;
+    if (c.dataset.sec) c.checked ? sel.add(c.dataset.sec) : sel.delete(c.dataset.sec);
+    if (c.dataset.unit) DATA.find(u => u.n == c.dataset.unit).s.forEach((s, i) => c.checked ? sel.add(`${c.dataset.unit}.${i}`) : sel.delete(`${c.dataset.unit}.${i}`));
+    selChanged();
+  });
+}
+function syncTree() {
+  document.querySelectorAll('[data-sec]').forEach(c => c.checked = sel.has(c.dataset.sec));
+  DATA.forEach(u => {
+    const c = document.querySelector(`[data-unit="${u.n}"]`);
+    const n = u.s.filter((s, i) => sel.has(`${u.n}.${i}`)).length;
+    c.checked = n === u.s.length; c.indeterminate = n > 0 && n < u.s.length;
+  });
+}
+function selChanged() { store.set(selKey(), [...sel]); syncTree(); status(); render(); }
+
+// ---------- status ----------
+function status() {
+  const p = pool();
+  const m = p.filter(w => P(w.id).box >= MAXBOX).length;
+  $('#st1').textContent = T('selected', p.length, WORDS.length);
+  $('#st2').textContent = T('learnedOf', m, p.length);
+  $('#st3').textContent = dirLabel(opts.dir);
+}
+const boxes = b => `<span class="boxes" title="${T('level', b, MAXBOX)}" aria-label="${T('level', b, MAXBOX)}">${Array.from({ length: MAXBOX }, (_, i) => `<i class="${i < b ? 'on' : ''}"></i>`).join('')}</span>`;
+const emptyMsg = () => `<div class="empty"><p class="big">${T('emptyT')}</p><p>${T('emptyP')}</p></div>`;
+
+// ---------- views ----------
+let S = null;
+let keyHandler = null;
+function render() {
+  keyHandler = null; S = null; $('#view').onclick = null;
+  document.documentElement.dataset.view = opts.view;
+  document.querySelectorAll('.tool').forEach(b => b.setAttribute('aria-pressed', b.dataset.view === opts.view));
+  ({ browse: viewBrowse, learn: viewLearn, quiz: viewQuiz, write: viewWrite, stats: viewStats })[opts.view]();
+}
+
+function viewBrowse() {
+  const v = $('#view');
+  v.innerHTML = `<div class="searchrow"><input id="q" type="search" enterkeyhint="search" autocomplete="off" placeholder="${T('search')}" aria-label="${T('search')}"><span class="hint" id="qc"></span></div>
+    <div class="tablewrap"><table><thead><tr>${LANGS.map(l => `<th class="c-${l}">${T('L_' + l)}</th>`).join('')}<th>${T('colLevel')}</th><th></th></tr></thead><tbody id="tb"></tbody></table></div>`;
+  const draw = () => {
+    const q = norm($('#q').value);
+    let last = null, rows = '', n = 0;
+    pool().forEach(w => {
+      if (q && !LANGS.some(l => norm(w[l]).includes(q))) return;
+      if (w.sec !== last) { rows += `<tr class="unit"><td colspan="5">${UW()} ${w.unit}: ${esc(w.st)}</td></tr>`; last = w.sec; }
+      rows += `<tr>${LANGS.map(l => `<td>${esc(w[l])}</td>`).join('')}<td>${boxes(P(w.id).box)}</td><td><button class="spk" data-say="${w.id}" aria-label="${T('readAloud')}">🔊</button></td></tr>`;
+      n++;
+    });
+    $('#tb').innerHTML = rows || `<tr><td colspan="5" class="hint">${sel.size ? T('noMatch') : T('tickTopic')}</td></tr>`;
+    $('#qc').textContent = T('shown', n);
+  };
+  $('#q').addEventListener('input', draw);
+  $('#tb').addEventListener('click', e => { const b = e.target.closest('[data-say]'); if (b) sayTarget(BYID[b.dataset.say]); });
+  draw();
+}
+
+function progressBar(i, n, label) {
+  return `<div class="prog"><span>${label}</span><div class="bar sunken" role="progressbar" aria-valuemin="0" aria-valuemax="${n}" aria-valuenow="${i}"><b style="width:${n ? i / n * 100 : 0}%"></b></div><span>${i}/${n}</span></div>`;
+}
+function cardHTML(w, sd, showA) {
+  const long = sd.q.length > 40 || sd.a.length > 40 ? ' long' : '';
+  return `<div class="card${long}">
+    <div class="where"><span>${UW()} ${w.unit}: ${esc(w.st)}</span>${boxes(P(w.id).box)}</div>
+    <div class="zone zq lang-${sd.qk}">
+      <div class="langtag">${T('L_' + sd.qk)}</div>
+      <div class="q" lang="${sd.qk}">${esc(sd.q)}</div>
+      <button class="spk" id="say" aria-label="${T('readAloud')}">🔊</button>
+    </div>
+    <div class="zone za lang-${sd.key}">
+      <div class="langtag">${T('L_' + sd.key)}</div>
+      <div class="a ${showA ? 'flipin' : 'hidden'}" lang="${sd.key}" aria-hidden="${!showA}">${showA ? esc(sd.a) : '?'}</div>
+    </div>
+  </div>`;
+}
+function summary(title, right, total, again) {
+  const pct = total ? Math.round(right / total * 100) : 0;
+  const msg = pct === 100 ? T('perfect') : pct >= 80 ? T('veryGood') : pct >= 50 ? T('goodStart') : T('newWords');
+  $('#view').onclick = null;
+  $('#view').innerHTML = `<div class="dialog raised"><div class="titlebar"><span class="name">${title}</span></div><div class="body">
+    <p class="big">${T('rightOf', right, total, pct)}</p><p>${msg}</p>
+    <div class="actions" style="justify-content:flex-start"><button class="btn raised default" id="again">${T('newRound')}</button><button class="btn raised" id="tostats">${T('seeStats')}</button></div></div></div>`;
+  $('#again').onclick = again; $('#again').focus({ preventScroll: true });
+  $('#tostats').onclick = () => setView('stats');
+  keyHandler = e => { if (e.key === 'Enter') { e.preventDefault(); again(); } };
+}
+
+// Flashcards
+function viewLearn() {
+  const round = pickRound();
+  if (!round.length) { $('#view').innerHTML = emptyMsg(); return; }
+  S = { queue: round.map(w => w.id), total: round.length, done: 0, firstRight: 0, missed: new Set() };
+  nextCard();
+}
+function nextCard() {
+  if (!S.queue.length) return summary(T('doneLearn'), S.firstRight, S.total, viewLearn);
+  const w = BYID[S.queue[0]]; const sd = side(w); let shown = false;
+  const draw = () => {
+    $('#view').innerHTML = `<div class="stage">${progressBar(S.done, S.total, T('round'))}
+      ${cardHTML(w, sd, shown)}
+      <div class="actions">${shown
+        ? `<button class="btn raised" id="no">${T('dontKnow')}</button><button class="btn raised default" id="yes">${T('knew')}</button>`
+        : `<button class="btn raised default" id="show">${T('showAns')}</button>`}</div>
+      <div class="kbd">${shown ? T('keysLearn') : T('keySpace')}</div></div>`;
+    $('#say').onclick = () => speak(shown ? sd.a : sd.q, shown ? sd.alang : sd.qlang);
+    if (shown) { $('#yes').onclick = () => answer(true); $('#no').onclick = () => answer(false); $('#yes').focus({ preventScroll: true }); }
+    else { $('#show').onclick = reveal; $('#show').focus({ preventScroll: true }); }
+  };
+  const reveal = () => { shown = true; draw(); if (opts.autospeak) sayTarget(w); };
+  const answer = ok => {
+    S.queue.shift();
+    if (ok) { S.done++; if (!S.missed.has(w.id)) { S.firstRight++; mark(w.id, true); } }
+    else { S.missed.add(w.id); mark(w.id, false); S.queue.splice(Math.min(3, S.queue.length), 0, w.id); }
+    nextCard();
+  };
+  keyHandler = e => {
+    if (!shown && (e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); reveal(); }
+    else if (shown && e.key === '1') answer(false);
+    else if (shown && e.key === '2') answer(true);
+  };
+  draw();
+  if (opts.autospeak && sd.qtarget) sayTarget(w);
+}
+
+// Multiple choice
+function viewQuiz() {
+  const round = pickRound();
+  if (!round.length) { $('#view').innerHTML = emptyMsg(); return; }
+  S = { list: round, i: 0, right: 0 };
+  nextQuiz();
+}
+function nextQuiz() {
+  $('#view').onclick = null;
+  if (S.i >= S.list.length) return summary(T('doneQuiz'), S.right, S.list.length, viewQuiz);
+  const w = S.list[S.i]; const sd = side(w);
+  const correct = w[sd.key];
+  // never offer a distractor that is also a correct translation of the question
+  const okAlso = x => x[sd.key] !== correct && norm(x[sd.qk]) !== norm(w[sd.qk]);
+  const same = shuffle(WORDS.filter(x => x.sec === w.sec && okAlso(x)));
+  const other = shuffle(WORDS.filter(x => x.sec !== w.sec && okAlso(x)));
+  const opts4 = [correct];
+  for (const x of same.concat(other)) { if (opts4.length >= 4) break; if (!opts4.includes(x[sd.key])) opts4.push(x[sd.key]); }
+  shuffle(opts4);
+  let done = false;
+  const advance = () => { S.i++; nextQuiz(); };
+  $('#view').innerHTML = `<div class="stage">${progressBar(S.i, S.list.length, T('score', S.right))}
+    ${cardHTML(w, sd, false)}
+    <div class="choices lang-${sd.key}">${opts4.map((o, k) => `<button class="choice raised" data-k="${k}" lang="${sd.key}"><span class="n">${k + 1}</span><span>${esc(o)}</span></button>`).join('')}</div>
+    <div class="actions"><button class="btn raised default" id="next" disabled>${T('next')}</button></div>
+    <p class="tapnext hint" id="tapnext" hidden>${T('tapNext')}</p>
+    <div class="kbd">${T('keysQuiz')}</div></div>`;
+  $('#say').onclick = e => { e.stopPropagation(); speak(sd.q, sd.qlang); };
+  const pick = k => {
+    if (done) return; done = true;
+    const ok = opts4[k] === correct;
+    if (ok) S.right++;
+    mark(w.id, ok);
+    document.querySelectorAll('.choice').forEach((b, j) => {
+      b.disabled = true;
+      if (opts4[j] === correct) b.classList.add('right'); else if (j === k) b.classList.add('wrong');
+    });
+    const a = document.querySelector('.card .a'); a.className = 'a flipin'; a.textContent = correct; a.setAttribute('aria-hidden', 'false');
+    if (opts.autospeak) sayTarget(w);
+    $('#next').disabled = false; $('#tapnext').hidden = false; $('#next').focus({ preventScroll: true });
+    // the next tap or click anywhere in the practice area moves on
+    setTimeout(() => { $('#view').onclick = e => { if (e.target.closest('#say')) return; advance(); }; }, 0);
+  };
+  document.querySelectorAll('.choice').forEach(b => b.onclick = e => { if (!done) { e.stopPropagation(); pick(+b.dataset.k); } });
+  keyHandler = e => {
+    if (!done && /^[1-4]$/.test(e.key)) pick(+e.key - 1);
+    else if (done && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); advance(); }
+  };
+  if (opts.autospeak && sd.qtarget) sayTarget(w);
+}
+
+// Writing test
+function viewWrite() {
+  const round = pickRound();
+  if (!round.length) { $('#view').innerHTML = emptyMsg(); return; }
+  S = { list: round, i: 0, right: 0 };
+  nextWrite();
+}
+function nextWrite() {
+  if (S.i >= S.list.length) { kbBlur(); return summary(T('doneWrite'), S.right, S.list.length, viewWrite); }
+  const w = S.list[S.i]; const sd = side(w); let state = 'ask', wasOk = false;
+  $('#view').innerHTML = `<div class="stage">${progressBar(S.i, S.list.length, T('score', S.right))}
+    ${cardHTML(w, sd, false)}
+    <div class="answer lang-${sd.key}"><input id="inp" type="text" lang="${sd.key}" enterkeyhint="go" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false" aria-label="${T('typeIn_' + sd.key)}" placeholder="${T('typeIn_' + sd.key)}"><button class="btn raised default" id="chk">${T('check')}</button></div>
+    <div class="feedback" id="fb" aria-live="polite"></div>
+    <div class="kbd">${T('enterHint')}${sd.key === 'de' ? ' ' + T('umlautHint') : ''}</div></div>`;
+  const inp = $('#inp');
+  const keepTyping = () => { try { inp.focus({ preventScroll: true }); } catch (e) { inp.focus(); } };
+  keepTyping();
+  $('#say').onclick = () => speak(sd.q, sd.qlang);
+  const go = () => {
+    if (state === 'ask') {
+      if (!inp.value.trim()) { $('#fb').className = 'feedback'; $('#fb').textContent = T('typeFirst'); state = 'empty'; keepTyping(); return; }
+      check();
+    } else if (state === 'empty') check();
+    else { S.i++; nextWrite(); }
+  };
+  const check = () => {
+    const prevBox = P(w.id).box;
+    wasOk = isCorrect(inp.value, sd.a);
+    const art = sd.key === 'de' && /^(der|die|das) /i.test(sd.a) && !/^(der|die|das) /i.test(inp.value.trim());
+    if (wasOk) S.right++;
+    mark(w.id, wasOk);
+    state = 'done';
+    inp.classList.add('locked');
+    const a = document.querySelector('.card .a'); a.className = 'a flipin'; a.textContent = sd.a; a.setAttribute('aria-hidden', 'false');
+    $('#fb').className = 'feedback ' + (wasOk ? 'ok' : 'bad');
+    $('#fb').innerHTML = wasOk ? (art ? `✓ ${T('rightArticle')} <b>${esc(sd.a)}</b>` : `✓ ${T('right')} <b>${esc(sd.a)}</b>`) :
+      `✗ ${T('answerIs')} <b>${esc(sd.a)}</b>. <button class="btn raised" id="override">${T('override')}</button>`;
+    $('#chk').textContent = T('nextWord');
+    if (!wasOk) $('#override').onclick = () => {
+      S.right++; const p = P(w.id); p.wrong = Math.max(0, p.wrong - 1); p.box = prevBox; mark(w.id, true);
+      $('#fb').className = 'feedback ok'; $('#fb').innerHTML = `✓ ${T('counted')} <b>${esc(sd.a)}</b>`; keepTyping();
+    };
+    if (opts.autospeak) sayTarget(w);
+    // keep focus in the field so an on-screen keyboard stays open; Return/Go moves on
+    keepTyping();
+  };
+  inp.addEventListener('beforeinput', e => { if (state === 'done') e.preventDefault(); });
+  $('#chk').onclick = go;
+  keyHandler = e => { if (e.key === 'Enter' && e.target.id !== 'override') { e.preventDefault(); go(); } };
+  if (opts.autospeak && sd.qtarget) sayTarget(w);
+}
+
+// Statistics
+const BOXCOL = ['var(--b0)', 'var(--b1)', 'var(--b2)', 'var(--b3)', 'var(--b4)', 'var(--b5)'];
+function viewStats() {
+  const BOXNAME = T('boxNames');
+  const all = WORDS.map(w => P(w.id));
+  const seen = all.filter(p => p.right + p.wrong > 0).length;
+  const learned = all.filter(p => p.box >= MAXBOX).length;
+  const r = all.reduce((s, p) => s + p.right, 0), wr = all.reduce((s, p) => s + p.wrong, 0);
+  const row = (label, ws) => {
+    const c = [0, 0, 0, 0, 0, 0]; ws.forEach(w => c[P(w.id).box]++);
+    const l = c[MAXBOX];
+    return `<div class="urow"><span>${label}</span><div class="stack sunken" aria-label="${T('learnedAria', l, ws.length)}">${[5, 4, 3, 2, 1, 0].map(i => c[i] ? `<span style="width:${c[i] / ws.length * 100}%;background:${BOXCOL[i]}" title="${BOXNAME[i]}: ${c[i]}"></span>` : '').join('')}</div><span>${Math.round(l / ws.length * 100)}%</span></div>`;
+  };
+  const hard = WORDS.filter(w => P(w.id).wrong > 0).sort((a, b) => P(b.id).wrong - P(a.id).wrong).slice(0, 10);
+  $('#view').innerHTML = `
+    <div class="statgrid">
+      <div class="raised">${T('statWords')}<b>${WORDS.length}</b></div>
+      <div class="raised">${T('practised')}<b>${seen}</b></div>
+      <div class="raised">${T('learned')}<b>${learned}</b></div>
+      <div class="raised">${T('accuracy')}<b>${r + wr ? Math.round(r / (r + wr) * 100) : 0}%</b></div>
+    </div>
+    <div class="groupt">${T('progressBy')}</div>
+    ${DATA.map(u => row(`${UW()} ${u.n}: ${esc(u.t)}`, WORDS.filter(w => w.unit === u.n))).join('')}
+    <div class="legend">${[5, 4, 3, 2, 1, 0].map(i => `<span><i style="background:${BOXCOL[i]}"></i>${BOXNAME[i]}</span>`).join('')}</div>
+    <p class="hint">${T('levelsHint')}</p>
+    <div class="groupt">${T('missMost')}</div>
+    ${hard.length ? `<div class="tablewrap"><table><thead><tr>${LANGS.map(l => `<th class="c-${l}">${T('L_' + l)}</th>`).join('')}<th>${T('missed')}</th></tr></thead><tbody>${hard.map(w => `<tr>${LANGS.map(l => `<td>${esc(w[l])}</td>`).join('')}<td>${P(w.id).wrong}×</td></tr>`).join('')}</tbody></table></div>` : `<p class="hint">${T('nothingYet')}</p>`}
+    <p style="margin-top:18px"><button class="btn raised" id="reset">${T('reset')}</button> <span class="hint" id="rh"></span></p>`;
+  let armed = false;
+  $('#reset').onclick = () => {
+    if (!armed) { armed = true; $('#reset').textContent = T('resetYes'); $('#rh').textContent = T('resetWarn'); return; }
+    prog = {}; store.set('progress', prog); status(); viewStats();
+  };
+}
+
+// ---------- keyboards ----------
+const root = document.documentElement;
+// a key press outside a text field can only come from a hardware keyboard: show shortcut hints from then on
+document.addEventListener('keydown', e => {
+  const t = e.target;
+  if (!(t.tagName === 'INPUT' && t.type !== 'checkbox') && t.tagName !== 'SELECT' && t.tagName !== 'TEXTAREA') root.classList.add('has-kb');
+}, true);
+// on-screen keyboard: when it covers a big part of the screen while typing, switch to a compact layout
+function kbCheck() {
+  const vv = window.visualViewport; if (!vv) return;
+  const a = document.activeElement;
+  const typing = a && a.tagName === 'INPUT' && a.type !== 'checkbox';
+  const open = typing && window.innerHeight - vv.height > 140;
+  if (open !== root.classList.contains('kb-open')) {
+    root.classList.toggle('kb-open', open);
+    if (open && a.id === 'inp') requestAnimationFrame(() => a.closest('.stage').scrollIntoView({ block: 'start' }));
+  }
+}
+function kbBlur() { root.classList.remove('kb-open'); }
+if (window.visualViewport) { visualViewport.addEventListener('resize', kbCheck); }
+document.addEventListener('focusout', () => setTimeout(kbCheck, 250));
+document.addEventListener('focusin', () => setTimeout(kbCheck, 350));
+
+// ---------- wiring ----------
+function setView(v) { opts.view = v; store.set('opts', opts); kbBlur(); render(); }
+document.querySelectorAll('.tool').forEach(b => b.onclick = () => setView(b.dataset.view));
+function fillDirs() {
+  const d = $('#dir');
+  d.innerHTML = DIRS.map(x => `<option value="${x}">${dirLabel(x)}</option>`).join('');
+  if (!DIRS.includes(opts.dir)) opts.dir = 'en-de';
+  d.value = opts.dir;
+}
+$('#size').value = opts.size; $('#autospeak').checked = opts.autospeak; $('#weak').checked = opts.weak;
+$('#dir').onchange = e => { opts.dir = e.target.value; store.set('opts', opts); status(); if (opts.view !== 'browse' && opts.view !== 'stats') render(); };
+$('#size').onchange = e => { opts.size = e.target.value; store.set('opts', opts); if (opts.view !== 'browse' && opts.view !== 'stats') render(); };
+$('#autospeak').onchange = e => { opts.autospeak = e.target.checked; store.set('opts', opts); };
+$('#weak').onchange = e => { opts.weak = e.target.checked; store.set('opts', opts); };
+$('#all').onclick = () => { DATA.forEach(u => u.s.forEach((s, i) => sel.add(`${u.n}.${i}`))); selChanged(); };
+$('#none').onclick = () => { sel.clear(); selChanged(); };
+$('#treetoggle').onclick = () => { const l = $('#left'); l.classList.toggle('closed'); $('#treetoggle').setAttribute('aria-expanded', !l.classList.contains('closed')); };
+function typeTip() {
+  const k = document.querySelector('.kbd'); if (!k || k.dataset.tip) return;
+  k.dataset.tip = '1';
+  k.innerHTML = `${T('noTyping')} <button class="btn raised" id="gowrite">${T('nav_write')}</button>`;
+  document.getElementById('gowrite').onclick = () => setView('write');
+}
+document.addEventListener('keydown', e => {
+  const t = e.target;
+  if ((opts.view === 'learn' || opts.view === 'quiz') && t.tagName !== 'INPUT' && t.tagName !== 'SELECT' && !e.ctrlKey && !e.metaKey && !e.altKey && /^\p{L}$/u.test(e.key)) typeTip();
+  if (!keyHandler) return;
+  if (t.tagName === 'SELECT' || t.type === 'checkbox') return;
+  if (t.tagName === 'INPUT' && t.id !== 'inp') return;
+  if (t.tagName === 'BUTTON' && e.key === ' ' && !t.closest('.view')) return;
+  keyHandler(e);
+});
+const cs = $('#course');
+cs.innerHTML = Object.entries(COURSES).map(([k, c]) => `<option value="${k}">${esc(c.name)}</option>`).join('');
+cs.value = opts.course;
+const setTitle = () => { $('#wintitle').innerHTML = `<span class="app">${T('appName')}</span><span class="sub">${esc(C.title)}</span>`; document.title = T('appName') + ' – ' + C.title; document.querySelector('.win').setAttribute('aria-label', T('appName')); };
+const switchCourse = key => { useCourse(key); store.set('opts', opts); cs.value = key; drawCourses(); setTitle(); buildTree(); status(); render(); };
+cs.onchange = e => switchCourse(e.target.value);
+function drawCourses() {
+  $('#courselist').innerHTML = Object.entries(COURSES).map(([k, c]) => {
+    const i = c.name.indexOf(': ');
+    const top = i > 0 ? c.name.slice(0, i) : '', main = i > 0 ? c.name.slice(i + 2) : c.name;
+    return `<button class="citem" role="radio" aria-checked="${k === opts.course}" data-course="${k}">${top ? `<span class="ctop">${esc(top)}</span>` : ''}<span class="cmain">${esc(main)}</span></button>`;
+  }).join('');
+}
+$('#courselist').onclick = e => { const b = e.target.closest('[data-course]'); if (b && b.dataset.course !== opts.course) switchCourse(b.dataset.course); };
+$('#courselist').onkeydown = e => {
+  if (!['ArrowDown', 'ArrowUp'].includes(e.key)) return;
+  e.preventDefault(); const keys = Object.keys(COURSES); const i = keys.indexOf(opts.course);
+  const k = keys[(i + (e.key === 'ArrowDown' ? 1 : -1) + keys.length) % keys.length];
+  switchCourse(k); document.querySelector(`[data-course="${k}"]`).focus();
+};
+drawCourses();
+const THEMECOLOR = { classic: '#3a6ea5', light: '#ECEEF3', dark: '#0D121D' };
+function applyTheme() {
+  if (opts.ui === 'classic') { delete root.dataset.ui; delete root.dataset.theme; }
+  else { root.dataset.ui = 'modern'; root.dataset.theme = opts.ui; }
+  $('#theme').value = opts.ui;
+  const m = document.getElementById('tc'); if (m) m.setAttribute('content', THEMECOLOR[opts.ui]);
+}
+$('#theme').onchange = e => { opts.ui = e.target.value; store.set('opts', opts); applyTheme(); };
+$('#lang').onchange = e => { opts.lang = e.target.value; store.set('opts', opts); applyLang(); fillDirs(); setTitle(); buildTree(); status(); render(); };
+applyTheme(); applyLang(); fillDirs(); setTitle(); treeEvents(); buildTree(); status(); render();
+
+</script>
+</body>
+</html>
