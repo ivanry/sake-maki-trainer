@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Antike: Lernkarte zur Schularbeit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=PT+Serif:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EDF0F1; --paper:#F8F9F9; --ink:#16223A; --muted:#566178; --line:#C9D0D6;
+  --sea:#CBDDE8; --land:#E6E1D3; --coast:#9FB4C3;
+  --g:#2E6A9E; --m:#A87A12; --r:#9B2D3A;
+  --hl:#FFF1B8; --hide:#D7DDE3;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1726; --paper:#16203A; --ink:#E6EAF2; --muted:#9AA6BD; --line:#2C3A58;
+    --sea:#1B2D4A; --land:#26304A; --coast:#3A5275;
+    --g:#6FA8DC; --m:#E0B24A; --r:#E07A87; --hl:#4A4220; --hide:#2C3A58;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1726; --paper:#16203A; --ink:#E6EAF2; --muted:#9AA6BD; --line:#2C3A58;
+  --sea:#1B2D4A; --land:#26304A; --coast:#3A5275;
+  --g:#6FA8DC; --m:#E0B24A; --r:#E07A87; --hl:#4A4220; --hide:#2C3A58;
+  color-scheme:dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 "IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+h1,h2,h3{font-family:"PT Serif",Georgia,"Times New Roman",serif;font-weight:700;line-height:1.2;margin:0}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 18px 48px}
+header{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between;margin-bottom:14px}
+header h1{font-size:clamp(1.6rem,3.4vw,2.3rem)}
+header p{margin:4px 0 0;color:var(--muted);max-width:62ch}
+.toggle{display:inline-flex;align-items:center;gap:10px;border:1.5px solid var(--ink);background:transparent;color:var(--ink);padding:8px 14px;border-radius:999px;font:inherit;font-weight:500;cursor:pointer}
+.toggle[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+button:focus-visible,[tabindex]:focus-visible,summary:focus-visible,.bar:focus-visible{outline:3px solid var(--m);outline-offset:2px}
+
+.river{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:10px 6px 4px;overflow-x:auto}
+.river svg{display:block;min-width:760px;width:100%;height:auto}
+.bar{cursor:pointer}
+.bar rect{transition:opacity .2s}
+.bar text{font:500 12px "IBM Plex Sans",sans-serif;fill:var(--ink)}
+.bar.dim rect{opacity:.35}
+.bar.on rect{stroke:var(--ink);stroke-width:2}
+.axis text{font:11px "IBM Plex Sans",sans-serif;fill:var(--muted)}
+.lane-label{font:italic 13px "PT Serif",serif;fill:var(--muted)}
+.hint{font-size:.85rem;color:var(--muted);margin:6px 4px 0}
+
+.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:18px;margin-top:18px;align-items:start}
+@media (max-width:860px){.stage{grid-template-columns:1fr}}
+.mapbox{position:sticky;top:calc(env(safe-area-inset-top,0px) + 10px);background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+@media (max-width:860px){.mapbox{position:static}}
+.mapbox svg{display:block;width:100%;aspect-ratio:16/11;background:var(--land)}
+.mapcap{padding:8px 12px;font-size:.85rem;color:var(--muted);border-top:1px solid var(--line)}
+.place text{font-family:"IBM Plex Sans",sans-serif;fill:var(--ink);paint-order:stroke;stroke:var(--land);stroke-linejoin:round}
+.place.off{opacity:.35}
+.place.off text{display:none}
+
+.frame{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px 22px 22px;border-top:6px solid var(--lane)}
+.fhead{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.period{font-family:"PT Serif",serif;font-size:clamp(1.5rem,3vw,2rem);color:var(--lane);line-height:1.1}
+.frame h2{font-size:1.35rem;margin-top:6px}
+.ru{color:var(--muted);margin-top:2px}
+.nav{display:flex;gap:6px;flex-shrink:0}
+.nav button{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--line);background:var(--bg);color:var(--ink);font-size:1.1rem;cursor:pointer}
+.nav button:disabled{opacity:.35;cursor:default}
+.count{font-size:.8rem;color:var(--muted);text-align:right;margin-top:4px}
+.summary{margin:14px 0 0;max-width:68ch}
+.cause{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:stretch;margin:16px 0 4px}
+.cause div{background:var(--bg);border-radius:10px;padding:10px 12px;font-size:.93rem}
+.cause b{display:block;font-family:"PT Serif",serif;font-size:1rem;margin-bottom:2px}
+.cause .arr{display:flex;align-items:center;font-size:1.4rem;color:var(--lane);background:none;padding:0}
+@media (max-width:520px){.cause{grid-template-columns:1fr}.cause .arr{justify-content:center;transform:rotate(90deg)}}
+.frame h3{font-size:1.05rem;margin:20px 0 8px;padding-bottom:4px;border-bottom:1px solid var(--line)}
+dl{margin:0;display:grid;grid-template-columns:minmax(110px,auto) 1fr;gap:6px 14px}
+dt{font-weight:600}
+dd{margin:0}
+.dates dt{font-family:"PT Serif",serif;color:var(--lane);white-space:nowrap}
+.terms dt{font-style:normal}
+@media (max-width:520px){dl{grid-template-columns:1fr;gap:0}dd{margin-bottom:8px}.dates dt{white-space:normal}}
+.qs{margin:0;padding-left:1.2em}
+.qs li{margin:4px 0}
+.op{font-weight:600;color:var(--lane)}
+.src{font-size:.82rem;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+.tablewrap{overflow-x:auto}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{background:var(--bg);font-weight:600}
+.next{margin-top:20px;display:flex;gap:12px;align-items:center;background:var(--bg);border-radius:10px;padding:12px 14px}
+.next .gap{font-family:"PT Serif",serif;font-size:1.6rem;color:var(--lane);flex-shrink:0}
+.next button{margin-left:auto;flex-shrink:0;border:none;background:var(--lane);color:var(--paper);padding:8px 14px;border-radius:999px;font:inherit;font-weight:500;cursor:pointer}
+
+/* Lernmodus */
+body.quiz .hide{background:var(--hide);color:transparent;border-radius:4px;cursor:pointer;user-select:none;transition:background .15s}
+body.quiz .hide *{visibility:hidden}
+body.quiz .hide.open{background:var(--hl);color:inherit}
+body.quiz .hide.open *{visibility:visible}
+.qnote{display:none;font-size:.88rem;background:var(--hl);border-radius:8px;padding:8px 12px;margin-top:12px}
+body.quiz .qnote{display:block}
+
+details{margin-top:22px;background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:4px 18px}
+summary{cursor:pointer;font-family:"PT Serif",serif;font-size:1.15rem;font-weight:700;padding:10px 0}
+details[open]{padding-bottom:16px}
+.all dt{display:flex;gap:8px;align-items:center}
+.dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.ops p{margin:6px 0;max-width:72ch}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div>
+    <h1>Antike: Griechenland, Hellenismus, Rom</h1>
+    <p>Politik, Kultur und Religion zur Zeit der Antike (S. 14–25) in 10 Stationen. Auf einen Balken in der Zeitleiste klicken oder mit ← → blättern.</p>
+  </div>
+  <button class="toggle" id="quizBtn" aria-pressed="false">Abfragemodus</button>
+</header>
+
+<div class="river" aria-label="Zeitleiste">
+  <svg id="river" viewBox="0 0 1000 238" role="img" aria-label="Drei parallele Zeitleisten: Griechenland, Makedonien/Hellenismus, Rom"></svg>
+</div>
+<p class="hint">Strichlinie bei 510 v. Chr.: Hippias muss Athen verlassen – und in Rom endet die Königsherrschaft.</p>
+
+<div class="stage">
+  <div class="mapbox">
+    <svg id="map" viewBox="0 0 800 230" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Karte des Mittelmeerraums"></svg>
+    <div class="mapcap" id="mapcap"></div>
+  </div>
+  <article class="frame" id="frame" aria-live="polite"></article>
+</div>
+
+<details>
+  <summary>Alle Daten chronologisch</summary>
+  <dl class="dates all" id="alldates"></dl>
+</details>
+
+</div>
+
+<script>
+const P = { // lon, lat
+  Athen:[23.7,38], Sparta:[22.4,37.1], Delphi:[22.5,38.5], Korinth:[22.9,37.9], Megara:[23.35,38.0],
+  Chalkis:[23.6,38.5], Thera:[25.4,36.4], Milet:[27.3,37.5], Byzantion:[29,41],
+  Sinope:[35.15,42], Massilia:[5.4,43.3], Neapel:[14.25,40.85], Syrakus:[15.3,37.1], Rom:[12.5,41.9],
+  Karthago:[10.3,36.9], Kyrene:[21.85,32.8], Alexandria:[29.9,31.2], Babylon:[44.4,32.5], Issos:[36.2,36.8],
+  Gaugamela:[43.5,36.4], Chaironeia:[22.8,38.6], Makedonien:[22.5,40.8], Salamis:[23.45,37.8], Tyros:[35.2,33.3],
+  Persepolis:[52.9,29.9], Industal:[68,26], Delos:[25.27,37.4]
+};
+const xy = ([lon,lat]) => [(lon+6)*10,(47-lat)*10];
+
+const SEA = [
+ [[-5.6,36],[-2,36.7],[0,38.7],[0.5,40.5],[3,42],[3.2,43.3],[5,43.3],[7.5,43.8],[8.8,44.4],[10.3,43.5],[11.5,42.3],[12.5,41.5],[14,40.8],[15.6,40],[15.7,38.2],[17,39],[18.5,40.1],[16,41.5],[14,42.5],[12.3,44.3],[13.7,45.6],[14.5,45.2],[16,43.5],[18.5,42.4],[19.4,41.5],[19.5,40],[20.5,39.2],[21.1,38.3],[21.6,37],[22.4,36.4],[23,36.5],[23.2,37.4],[23.9,37.7],[24,38.5],[22.9,39.4],[22.6,40.5],[24,40.8],[26,40.8],[26.2,40.1],[26.4,39],[27,38.4],[27.3,37],[28,36.7],[29,36.3],[30.6,36.8],[32.5,36.1],[34.6,36.8],[36,36.6],[35.8,35.5],[35.5,34],[35,33],[34.5,31.5],[32.3,31.2],[30,31.4],[25,31.6],[23,32.6],[20,32],[19.5,30.5],[15.5,31.5],[13,32.9],[11,33.5],[10.2,35],[11,36.9],[9.5,37.3],[6,37],[3,36.8],[0,35.8],[-2,35.1],[-5.4,35.9],[-6,35.9],[-6,36.6]],
+ [[28,41.3],[29,41.1],[31,41.1],[33,41.9],[35,42],[36.5,41.3],[38,41],[41.5,41.5],[41.6,42.6],[40,43.4],[38,44.4],[37.5,45.2],[36.5,45.4],[35,45],[33.5,44.5],[32.5,45.4],[33.5,46],[31.8,46.6],[30.2,45.8],[29.6,45],[28.7,44],[28,42.5]],
+ [[47,45],[49,46.5],[52,46.8],[53,45],[51,44],[52.5,42],[53.5,40],[53,37.5],[51,36.8],[49,37.5],[48.8,39],[49.5,40.4],[48,42.5],[47.5,43.5]],
+ [[48,30],[50.5,29],[52,27.5],[56.3,26.6],[57,25],[60,25.3],[66,25],[74,22],[74,20],[56,20],[54,24.2],[51.6,25.9],[50.8,24.8],[50,26.5],[48.5,28.3]],
+ [[-6,36.6],[-6,47],[-1.5,47],[-1.2,44.5],[-1.8,43.4],[-6,43.6]]
+];
+const ISLANDS = [
+ [[12.4,38.1],[15.6,38.3],[15.1,36.7],[12.4,37.8]],
+ [[23.5,35.6],[26.3,35.3],[24.7,34.9],[23.5,35.3]],
+ [[8.4,41.1],[9.8,41],[9.6,39.1],[8.4,39],[8.4,40.6]],
+ [[9.4,43],[9.5,41.4],[8.6,41.6]],
+ [[32.3,35],[34.6,35.6],[33.9,34.6],[32.4,34.7]]
+];
+
+const F = [
+{ id:"kolonisation", lane:"g", row:0, s:-1200, e:-550, short:"Kolonisation",
+  period:"1200–800 v. Chr. / Mitte 8. – Mitte 6. Jh.", title:"Griechische Kolonisation", ru:"Antike Wirtschaftsmigration?",
+  sum:"Zwischen 1200 und 800 v. Chr. wanderten Gruppen von Griechen nach Kleinasien, wahrscheinlich angelockt von den besseren Lebensbedingungen; dort blühten Landwirtschaft, Handwerk und Handel. Um die Mitte des 8. Jhs. v. Chr. stießen die seefahrterprobten Bewohner der Ägäisküste ins westliche Mittelmeer vor und gründeten eine Kette von Tochterstädten (apoikía), v. a. an den Küsten Siziliens und Unteritaliens (Magna Graecia). Die Siedler organisierten die Städte nach dem Vorbild ihrer Herkunftsstadt und übernahmen deren politische Ordnung und Gebräuche.",
+  cause:"Suche nach neuen Rohstoffquellen und Ackerland; Konflikte in den Poleis: für die wachsende Bevölkerung nicht genug Land, drohende Aufstände; aus wirtschaftlicher Not schlossen sich Kleinbauern den Händlern an. Außerdem wohl Abenteuerlust, Entdeckerfreude und Streben nach Machterweiterung.",
+  res:"Stabilisierung und Verbreitung der Poleis. Die zweite griechische Kolonisation schuf die Grundlage für den Aufschwung des Handels im Mittelmeerraum. In der Auseinandersetzung mit fremden Völkern wurden sich die Griechen ihrer „hellenischen“ Identität bewusst. Mit den Einheimischen wurden Verträge geschlossen; Konflikte entstanden, wenn die Neuansiedler Ackerland beanspruchten.",
+  places:["Delphi","Korinth","Thera","Massilia","Neapel","Syrakus","Kyrene","Byzantion","Milet","Sinope","Karthago"],
+  routes:[["Thera","Kyrene"]],
+  cap:"Orte aus M2 und dem Text. Pfeil: die Theraier besiedeln Kyrene in Libyen (M5). Karthago: wichtigste Stadt der Phöniker.",
+  d:[[-1200,"1200–800 v. Chr.","Gruppen von Griechen wandern nach Kleinasien"],
+     [-750,"Mitte 8. Jh. v. Chr.","Vorstoß ins westliche Mittelmeer (Sizilien, Unteritalien)"],
+     [-616,"616–578 v. Chr.","zur Zeit des Königs Tarquinius gründen die Phokäer Massilia (M4)"],
+     [-550,"Mitte 6. Jh. v. Chr.","Ende der Expansion; Kolonien im Schwarzmeerraum, an den Küsten Frankreichs, Spaniens und Nordafrikas"]],
+  p:[["Pythia","Priesterin in Delphi; gab den Theraiern das Orakel, es werde ihnen besser gehen, wenn sie mit Battos Kyrene in Libyen besiedelten (M5)"],
+     ["Battos","von den Theraiern mit zwei Fünfzigruderern nach Libyen entsandt; bei der Rückkehr wurden sie beschossen und nicht an Land gelassen (M5)"],
+     ["Herodot (ca. 480–424 v. Chr.)","griechischer Historiker und Geograf; gilt Cicero zufolge als „Vater der Geschichtsschreibung“"],
+     ["Marcus Iunianus Iustinus (2. oder 3. Jh. n. Chr.)","römischer Historiker; über die Gründung Massilias durch die Phokäer (M4)"]],
+  t:[["Polis, Pl. Poleis","griechischer Stadtstaat"],
+     ["apoikía","griech. = Aussiedlung; Tochterstadt"],
+     ["Herkunftsstadt / Tochterstadt","Vorbild für die Organisation / neu gegründete Stadt"],
+     ["Magna Graecia","lat.; Küsten Siziliens und Unteritaliens"],
+     ["Orakel von Delphi","Apolloheiligtum; vor dem Unternehmen befragt; nach der Stadtgründung dankten die Bewohner Apoll mit Weihegaben; wichtige Informationsbörse, die Priester übernahmen eine Planungsrolle"],
+     ["Themis","Schutzherrin des Orakels von Delphi (M1)"],
+     ["Phöniker, auch Phönizier (lat. Punier)","semitisches Volk an den Küsten des heutigen Libanon, gründete im Mittelmeerraum zahlreiche Handelsniederlassungen; wichtigste Stadt: Karthago"],
+     ["Thera","antiker Name der Insel Santorin nördlich von Kreta"],
+     ["Wirtschaftsmigration","Auswandern aus wirtschaftlichen Gründen"]],
+  q:[["Feststellen","anhand von M2, an welchen Küsten die Griechen Kolonien und die Phöniker Handelsniederlassungen gründeten; mithilfe des Atlas heutige Städtenamen griechischen Ursprungs ermitteln","S. 15, A1"],
+     ["Begründen","warum die griechische „Kolonisation“ als Eroberungs- und Wirtschaftsmigration bezeichnet werden kann (M4)","S. 15, A2"],
+     ["Diskutieren","die Entscheidung der Theraier, ihre Landsleute mit Waffengewalt von der Rückkehr in ihre Heimat abzuhalten (M5)","S. 15, A3"]],
+  next:["parallel","Während der Kolonisation: Krisen der Oligarchie in Athen (Ende 7. Jh. v. Chr.)"] },
+
+{ id:"solon", lane:"g", row:0, s:-620, e:-560, short:"Solon",
+  period:"Ende 7. Jh. – Anfang 6. Jh.", title:"Athen: Die Gesetze Solons", ru:"Von der Oligarchie zur Timokratie",
+  sum:"Die Polis Athen gilt als die Wiege der Demokratie. Krisen der Oligarchie am Ende des 7. Jhs. v. Chr. machten Reformen möglich: Die Blutrache wurde verhindert, Gerichte erhielten das Monopol der Rechtsprechung. Anfang des 6. Jhs. v. Chr. begann Solon, ein adeliger Landbesitzer und Kaufmann, die Spielregeln der Polis neu zu ordnen. Das Ausmaß politischer Mitsprache machte er vom Vermögen und damit der Steuerleistung abhängig.",
+  cause:"Krisen der Oligarchie am Ende des 7. Jhs. v. Chr. machten Reformen möglich.",
+  res:"Eunomie: Abschaffung der Schuldknechtschaft und Schuldenerlass. Timokratie. Die Volksversammlung wählte den Rat der 400, die Richter und die Archonten; Adelige (Reiterei) und freie Bauern (Hopliten) wurden an der Politik beteiligt. Frauen und Metöken blieben rechtlos. Mit der Eroberung von Salamis öffnete Solon den Weg Athens zur Handels- und Seemacht.",
+  places:["Athen","Salamis"],
+  routes:[],
+  cap:"Athen und die Insel Salamis vor der Küste Athens.",
+  d:[[-620,"Ende 7. Jh. v. Chr.","Krisen der Oligarchie; Blutrache verhindert, Gerichte erhalten das Monopol der Rechtsprechung"],
+     [-640,"um 640 – um 560 v. Chr.","Lebensdaten Solons"],
+     [-599,"Anfang 6. Jh. v. Chr.","Solon beginnt, die Spielregeln der Polis neu zu ordnen"]],
+  p:[["Solon","adeliger Landbesitzer und Kaufmann; eroberte als Stratege und militärischer Befehlshaber die Insel Salamis"],
+     ["Aristoteles","Philosoph; spricht von Timokratie (M1, Nikomachische Ethik)"]],
+  t:[["Demokratie","griech. demos = Volk, krátos = Herrschaft; also Herrschaft des Volkes"],
+     ["Oligarchie","griech. oligoi = wenige, arché = Herrschaft; also Herrschaft von Wenigen"],
+     ["Eunomie","gute Gesetze; so nannte Solon die Abschaffung der Schuldknechtschaft und den Schuldenerlass für verarmte Kleinbauern"],
+     ["Timokratie","griech. timein = einschätzen der Steuerleistung, krátos = Herrschaft"],
+     ["Oikos","geschlossene Hauswirtschaft des Bauernhofes; Basis der griechischen Gesellschaften; der Bauer war Oberhaupt und stimmberechtigt in der Volksversammlung"],
+     ["Areopag / Archonten","Rat / Beamte; Archon = führender Amtsträger, Leiter der Verwaltung"],
+     ["Hopliten","schwer bewaffnete Fußtruppe (Bauern im Kriegsfall)"],
+     ["Metöken","in Athen ansässige Fremde; wie Frauen politisch rechtlos"],
+     ["Rat der 400","nach den Reformen Solons von der Volksversammlung gewählt; das eigentliche Entscheidungsgremium"],
+     ["Trieren","sehr schnelle Kriegsschiffe mit drei übereinanderliegenden Ruderdecks; Flotte finanziert aus Einkünften der Silberminen in öffentlichem Besitz; Ruderer: Kriegsgefangene oder Sklaven"]],
+  q:[["Zusammenfassen","die von Aristoteles (M1) dargestellten Regierungsformen samt deren wichtigsten Eigenschaften","S. 20, A1"],
+     ["Erklären","inwiefern der Bau einer Kriegsflotte wichtig für Athens politische Vormachtstellung in der Region war","S. 20, A4"]],
+  next:["danach","Trotzdem erheben einzelne Adelige weiter umfassende Herrschaftsansprüche → Tyrannis"] },
+
+{ id:"tyrannis", lane:"g", row:1, s:-546, e:-510, short:"Tyrannis",
+  period:"6. Jh. – 510 v. Chr.", title:"Tyrannis", ru:"Peisistratos und die Peisistratiden",
+  sum:"Peisistratos, Lykurg und Megakles sammelten in Athen und im Umland Anhängerschaften. Peisistratos gelang es nach mehreren Anläufen, Tyrann zu werden, unumschränkter Herrscher. Er herrschte achtzehn Jahre lang über Athen. An den Gesetzen Solons änderte er formal nichts, er bestimmte allerdings über die Vergabe vieler Ämter. Als er starb, traten seine Söhne Hippias und Hipparchos die Nachfolge an; sie sorgten dafür, dass Kleisthenes 525 v. Chr. Archon wurde. Das Bündnis hielt nicht lange: Kleisthenes verließ Athen, um Verbündete gegen die Peisistratiden zu gewinnen.",
+  cause:"Herrschaftsansprüche einzelner Adeliger; ein großes Söldnerheer; weite Teile der Bevölkerung waren einer Alleinherrschaft nicht abgeneigt (das musste laut Herodot auch Solon erfahren).",
+  res:"514 v. Chr.: Anschlag von Harmodios und Aristogeiton (Motive unklar, evtl. persönliche Rache); Hipparchos getötet, Hippias überlebte. Vier Jahre später musste Hippias auf Druck der Bürgerschaft und von spartanischen Truppen belagert Athen verlassen. Harmodios und Aristogeiton wurden als „Tyrannenmörder“ gefeiert.",
+  places:["Athen","Sparta"],
+  routes:[["Sparta","Athen"]],
+  cap:"Pfeil: spartanische Truppen belagern Athen; Hippias muss die Stadt verlassen.",
+  d:[[-600,"um 600 – 528/527 v. Chr.","Peisistratos"],
+     [-525,"525 v. Chr.","Kleisthenes wird Archon"],
+     [-514,"514 v. Chr.","Panathenäische Spiele: Anschlag auf die Tyrannen, Hipparchos getötet"],
+     [-510,"510 v. Chr.","Hippias muss Athen verlassen (vier Jahre nach dem Anschlag)"]],
+  p:[["Peisistratos","Tyrann, herrschte achtzehn Jahre lang über Athen"],
+     ["Hippias","Sohn; überlebte den Anschlag, musste Athen verlassen"],
+     ["Hipparchos","Sohn; beim Anschlag getötet"],
+     ["Harmodios","noch am Ort des Anschlags getötet"],
+     ["Aristogeiton","gefangen genommen, gefoltert und angeblich von Hippias persönlich getötet"],
+     ["Lykurg, Megakles","Adelige mit Herrschaftsansprüchen; Kleisthenes war ein Sohn des Megakles"]],
+  t:[["Tyrannis","Abart des Königtums (Aristoteles, M1): Herrschaft eines Einzigen; der Tyrann schaut nur auf seinen Vorteil, der König auf das Wohl der Untertanen"],
+     ["Söldnerheer","Heer, dem Peisistratos seine Herrschaft verdankte"],
+     ["Peisistratiden","Peisistratos und seine Söhne"],
+     ["Panathenäische Spiele","religiös-politisches Fest im antiken Athen zu Ehren der Athene, der Schutzgöttin Athens"],
+     ["„Tyrannenmörder“","Harmodios und Aristogeiton (M3: römische Nachbildung einer griechischen Bronzeplastik, 5. Jh. v. Chr.)"]],
+  q:[],
+  next:["danach","In den Machtkämpfen nach der Vertreibung des Hippias setzt sich Kleisthenes durch"] },
+
+{ id:"kleisthenes", lane:"g", row:0, s:-508, e:-500, short:"Kleisthenes",
+  period:"um 508 v. Chr.", title:"Die Reformen des Kleisthenes", ru:"Von der Timokratie zur Isonomia",
+  sum:"In den Machtkämpfen nach der Vertreibung des Hippias konnte sich Kleisthenes durchsetzen. Um 508 v. Chr. begann er schrittweise tiefgreifende politische Reformen durchzusetzen. Ziel war es, die Timokratie Solons durch Isonomia zu ersetzen. Alle Männer, die älter als 18 Jahre waren, hatten nun in der Volksversammlung gleiches Stimmrecht. Zugleich führte er die Demen als regionale Unterteilung der Polis ein.",
+  cause:"Machtkämpfe nach der Vertreibung des Hippias.",
+  res:"Die demokratische Gleichstellung athenischer Bürger versuchte Kleisthenes durch das Losen von Beamten und Richtern zu erreichen. Frauen, Fremde, Sklaven blieben ohne politische Rechte.",
+  places:["Athen"],
+  routes:[],
+  cap:"Athen: Bürger in 10 Phylen (Stadt, Land, Küste), vgl. M4.",
+  d:[[-570,"um 570–507 v. Chr.","Kleisthenes"],
+     [-525,"525 v. Chr.","Kleisthenes wird Archon"],
+     [-508,"um 508 v. Chr.","Beginn der Reformen"]],
+  p:[["Kleisthenes","Sohn des Megakles; Reformer; Perikles war sein Großneffe"]],
+  t:[["Isonomia","griech. isos = gleich, nomia = Anwendung, Gewohnheit, Gesetz"],
+     ["Demen","demos = Volk; regionale Unterteilung der Polis"],
+     ["Phyle","Stamm, Sippe; ein antiker Grieche gehörte einer Polis und durch verwandtschaftliche Beziehungen auch einer Phyle an; die Bewohner einer Phyle kämpften gemeinsam, wählten ihren Strategen und entsandten 50 Männer in die Ratsversammlung"],
+     ["Rat der 500","50 je Phyle; entsenden durch Losentscheidung (aus allen 4 Klassen)"],
+     ["Prytanie","50 Ratsherren für je 36 Tage (regierendes Zehntel des Rates)"],
+     ["10 Strategen","führten im Kriegsfall die wehrpflichtigen Bürger der Phylen"],
+     ["Volksgericht","Richter durch Los bestimmt"],
+     ["Losmaschinen","ungefähr 1100 Ämter gelost: Beamte jährlich, Richter im Anlassfall, der Vorsitz im Rat der 500 monatlich"]],
+  schema:`<div class="tablewrap"><table><tr><th>Institution (M4)</th><th>Bestellung</th></tr>
+<tr><td>Volksversammlung</td><td>Bürger von Athen in 10 Phylen (Männer über 18 Jahre)</td></tr>
+<tr><td>Rat der 500 (50 je Phyle)</td><td>entsenden durch Losentscheidung (aus allen 4 Klassen)</td></tr>
+<tr><td>Prytanie</td><td>50 Ratsherren für je 36 Tage</td></tr>
+<tr><td>Volksgericht</td><td>Los</td></tr>
+<tr><td>9 Archonten, 10 Strategen</td><td>„wählt“: Volksversammlung; Pfeil „Oberbefehl“ zu den Strategen</td></tr>
+<tr><td>Areopag</td><td>ohne Pfeil im Schema</td></tr>
+<tr><td>Frauen, Fremde, Sklaven</td><td>ohne politische Rechte</td></tr></table></div>
+<p class="ru" style="margin-top:6px">Achtung: Im Text auf S. 20 heißt es „Nur die Strategen wurden durch Wahl bestimmt.“</p>`,
+  q:[],
+  next:["30 Jahre","508 → 478 v. Chr.: Gründung des Attisch-Delischen Seebundes"] },
+
+{ id:"perikles", lane:"g", row:1, s:-478, e:-404, short:"Perikles",
+  period:"478–404 v. Chr.", title:"Perikles und der Attisch-Delische Seebund", ru:"Athens Vormachtstellung und der Peloponnesische Krieg",
+  sum:"Der Attisch-Delische Seebund wurde nach der erfolgreichen Abwehr des persischen Eroberungsversuchs in der Seeschlacht von Salamis 478 v. Chr. gegründet und ab 454 v. Chr. von Athen aus regiert. Während der 2. Hälfte des 5. Jhs. bestimmte Perikles, Großneffe des Kleisthenes, die athenische Politik. Seine Macht beruhte auf dem Amt des Strategen, in das er ab 443 v. Chr. fünfzehnmal hintereinander gewählt wurde. Die Mitgliedsbeiträge des Seebundes verwendete er auch für den prunkvollen Ausbau der Akropolis mit dem als Schatzhaus dienenden Parthenon.",
+  cause:"Verteidigung gegen das Perserreich; Athen hatte von Anfang an eine Führungsrolle und großes Interesse an unbehindertem Handel in der Ägäis.",
+  res:"Ab dem Kalliasfrieden mit Persien (449 v. Chr.) verloren die Bündnispartner zunehmend ihre Unabhängigkeit gegenüber Athen. Im Peloponnesischen Krieg (431–404 v. Chr.) kämpfte der Seebund gegen den von Sparta geführten Peloponnesischen Bund, den dieser letztlich gewann. Sparta brachte dies kurzfristig die Vorherrschaft über die griechischen Poleis.",
+  places:["Athen","Salamis","Delos","Sparta"],
+  routes:[],
+  cap:"Delos: Tagungsort und Kriegskasse des Seebundes; ab 454 v. Chr. wird der Seebund von Athen aus regiert.",
+  d:[[-478,"478 v. Chr.","Gründung des Attisch-Delischen Seebundes nach der Seeschlacht von Salamis"],
+     [-454,"ab 454 v. Chr.","Seebund von Athen aus regiert"],
+     [-449,"449 v. Chr.","Kalliasfrieden mit Persien"],
+     [-443,"ab 443 v. Chr.","Perikles fünfzehnmal hintereinander zum Strategen gewählt"],
+     [-431,"431–404 v. Chr.","Peloponnesischer Krieg; der Peloponnesische Bund (Sparta) gewinnt"],
+     [1687,"1687","Parthenon schwer beschädigt: von venezianischer Artillerie beschossen, das osmanische Munitionslager explodiert"]],
+  p:[["Perikles","Großneffe des Kleisthenes; Stratege; „demokratische Alleinherrschaft“; Ausbau der Akropolis"],
+     ["Pallas Athene","Schutzgöttin Athens; ihr ist der Parthenon geweiht"],
+     ["Aristoteles","Philosoph; Regierungsformen (M1)"]],
+  t:[["Attisch-Delischer Seebund","Verteidigungsbündnis gegen das Perserreich; bis zu 400 Poleis auf den Inseln und an den Küsten der Ägäis; Delos: Tagungsort der jährlichen Bündnisversammlung, Kriegskasse im Apollontempel"],
+     ["Peloponnesischer Bund","von Sparta geführt"],
+     ["Stratege","Amt mit besonderem Gewicht; nicht ausgelost, sondern durch Wahl besetzt"],
+     ["Akropolis","Bezeichnung der Burgberge hellenischer Zentren"],
+     ["Parthenon","größter Tempel der Akropolis, der Pallas Athene geweiht; Jungfrauentempel; Schatzhaus"],
+     ["Kalliasfrieden","Frieden mit Persien 449 v. Chr."],
+     ["europäischer Erinnerungsort","die Akropolis von Athen (A5)"]],
+  schema:`<div class="tablewrap"><table><tr><th>Grundform</th><th>Abart</th><th>Merkmal laut M1</th></tr>
+<tr><td>Königtum (die beste)</td><td>Tyrannis</td><td>beide: Herrschaft eines Einzigen; der Tyrann schaut auf seinen Vorteil, der König auf das Wohl der Untertanen</td></tr>
+<tr><td>Aristokratie</td><td>Oligarchie</td><td>entsteht durch die Verderbtheit der herrschenden Schicht; oberstes Ziel ist der Reichtum; es herrschen „die Schlechtesten“</td></tr>
+<tr><td>Timokratie, meist Politie genannt (die schlechteste Grundform)</td><td>Demokratie</td><td>Timokratie beruht auf der Einstufung nach dem Vermögen; die Demokratie steht unter den Abarten am wenigsten tief</td></tr></table></div>`,
+  q:[["Zusammenfassen","die von Aristoteles (M1) dargestellten Regierungsformen samt deren wichtigsten Eigenschaften","S. 20, A1"],
+     ["Vergleichen","das Demokratieverständnis zur Zeit des Perikles mit dem in heutigen Demokratien westlicher Prägung; wesentliche Unterschiede und Gemeinsamkeiten herausstellen","S. 20, A2"],
+     ["Beschreiben","die Darstellung M7, die Hopliten zeigt","S. 20, A3"],
+     ["Darstellen","warum die Akropolis von Athen ein derart bedeutender europäischer Erinnerungsort war oder noch immer ist","S. 20, A5"]],
+  next:["66 Jahre","404 → 338 v. Chr.: Philipp II. siegt bei Chaironeia"] },
+
+{ id:"alexander", lane:"m", row:0, s:-338, e:-323, short:"Alexander",
+  period:"338–323 v. Chr.", title:"Philipp II. und Alexander III.", ru:"Der Alexanderzug",
+  sum:"Philipp II. von Makedonien besiegte 338 v. Chr. in der Schlacht von Chaironeia ein Bündnis von Athen und Theben und erlangte eine lockere Vorherrschaft über die hellenischen Poleis: Athen behielt seine demokratische Verfassung, Theben wurde direkt von Makedonien aus beherrscht. Sein Sohn und Nachfolger Alexander III. formte ein makedonisch-hellenisches Heer von rund 35 000 Mann und griff das persische Reich unter Dareios III. an. Zwischen 334 und 325 v. Chr. drangen seine Truppen immer weiter nach Osten vor und schlugen die persischen Armeen in mehreren Schlachten. Im Industal (heutiges Pakistan) nötigten ihn seine Truppen zur Rückkehr. Auf dem Rückweg erkrankte Alexander und starb in Babylon, noch keine 33 Jahre alt.",
+  cause:"Vorherrschaft Makedoniens über die hellenischen Poleis; makedonisch-hellenisches Heer gegen das Perserreich.",
+  res:"Nach der Niederlage bei Gaugamela wurde Dareios von seinem Verwandten, dem Satrapen Bessos, gefangen genommen und ermordet; Alexander betrachtete sich als sein Nachfolger. Am Hof sollte die Proskynese eingeführt werden (M1); den Kniefall verlangte Alexander künftig nur von den Persern, nicht von den Makedoniern.",
+  places:["Makedonien","Chaironeia","Athen","Issos","Tyros","Alexandria","Gaugamela","Babylon","Persepolis","Industal"],
+  routes:[["Makedonien","Issos"],["Issos","Tyros"],["Tyros","Alexandria"],["Alexandria","Gaugamela"],["Gaugamela","Babylon"],["Babylon","Persepolis"],["Persepolis","Industal"],["Industal","Babylon"]],
+  cap:"Kriegszug Alexanders des Großen nach M3 (Darstellung des Alexanderzugs).",
+  d:[[-382,"um 382–336 v. Chr.","Philipp II. von Makedonien"],
+     [-338,"338 v. Chr.","Schlacht von Chaironeia: Sieg über Athen und Theben"],
+     [-356,"356–323 v. Chr.","Alexander III. von Makedonien"],
+     [-334,"334–325 v. Chr.","Alexanders Truppen dringen nach Osten vor"],
+     [-333,"333 v. Chr.","Schlacht von Issos"],
+     [-331,"331 v. Chr.","Schlacht von Gaugamela"],
+     [-323,"323 v. Chr.","Tod Alexanders in Babylon"]],
+  p:[["Philipp II.","König von Makedonien"],
+     ["Alexander III.","Sohn und Nachfolger Philipps, „der Große“"],
+     ["Dareios III. (um 380–330 v. Chr.)","persischer Großkönig"],
+     ["Bessos","Satrap, Verwandter des Dareios; nahm ihn gefangen und ermordete ihn"],
+     ["Callisthenes (um 370–327 v. Chr.)","offizieller Hofschreiber; sprach sich gegen die Proskynesis aus, fiel in Ungnade, wurde gefangen gesetzt und getötet"],
+     ["Anaxarchos (um 360–320 v. Chr.)","Philosoph, begleitete Alexander; meinte laut M1, Alexander werde mit größerem Recht für einen Gott gehalten als Bacchus und Hercules"],
+     ["Lucius Flavius Arrianus (um 85 – um 145 n. Chr.)","Geschichtsschreiber; Anabasis Alexanders (M1)"]],
+  t:[["Proskynese (Proskynesis)","anbetender Kniefall; am persischen Hof üblich"],
+     ["Hofzeremoniell","Alexander wollte es einführen (M1)"],
+          ["göttliche Ehrenerweisungen","Callisthenes: Unterschied zwischen menschlichen und göttlichen Ehrenerweisungen (M1)"],
+          ["Mosaik aus dem Haus des Fauns","Pompeji, 2. Jh. v. Chr. (M2): Alexander (zu Pferd) und Dareios III. (im Streitwagen) bei Issos 333 oder Gaugamela 331 v. Chr."]],
+  q:[["Analysieren","Arrianus’ Auffassung von Alexanders Selbstverständnis als Herrscher (M1)","S. 23, A1"],
+     ["Rekonstruieren","Alexanders Selbstverständnis als Herrscher; dabei M2 einbeziehen","S. 23, A3"],
+     ["Analysieren","die Darstellung des Kriegszugs Alexanders (M3) anhand des Schemas „Kompetenzen erwerben“ (S. 16–17)","S. 23, A4"]],
+  next:["sofort","Nach Alexanders Tod kämpfen seine mächtigsten Offiziere um Macht und Herrschaftsgebiete"] },
+
+{ id:"hellenismus", lane:"m", row:1, s:-323, e:-30, short:"Hellenismus",
+  period:"323–30 v. Chr.", title:"Hellenismus", ru:"Die Diadochenreiche",
+  sum:"Die mächtigsten Offiziere von Alexanders Armee kämpften nach seinem Tod um Macht und Herrschaftsgebiete. So entstanden die Diadochenreiche (Nachfolgereiche) mit gemeinsamen Merkmalen: Die Sprache der Hellenen und ihre Gesetze in makedonischer Überformung bestimmten Kommunikation und Zusammenleben im östlichen Mittelmeerraum. Deshalb wird diese Epoche als Hellenismus bezeichnet. In den nach hellenischem Vorbild gegründeten Städten bildeten griechisch sprechende Fernhändler, Reeder und Manufakturbesitzer die Oberschicht. Die Hauptstädte der neuen Reiche wurden zu Zentren der Wissenschaft, Forschung und Kunst.",
+  cause:"Machtkämpfe der Offiziere nach Alexanders Tod.",
+  res:"Seit dem 2. Jh. v. Chr. gerieten die meisten Diadochenreiche nach und nach unter römische Herrschaft; bis 30 v. Chr. wurden viele in das Imperium Romanum eingegliedert. Die Schriften der Griechen blieben in Rom hoch geschätzt.",
+  places:["Alexandria","Babylon","Makedonien"],
+  routes:[],
+  cap:"Machtbereiche nach M3: Antigoniden (Makedonien), Seleukiden, Ptolemäer; Alexandria mit Museum und Bibliothek.",
+  d:[[-323,"323 v. Chr.","Tod Alexanders → Kämpfe der Offiziere, Diadochenreiche entstehen"],
+     [-200,"2. Jh. v. Chr.","die meisten Diadochenreiche geraten nach und nach unter römische Herrschaft; Geheimnis der Monsunwinde gelüftet"],
+     [-30,"30 v. Chr.","viele Diadochenreiche in das Imperium Romanum eingegliedert"]],
+  p:[["Diadochen","Nachfolger Alexanders"],
+     ["Seleukos, Ptolemaios","ihre Reiche bildeten Brückenköpfe für den Fernhandel mit Ost- und Südasien"],
+     ["70 Schriftgelehrte","sollen an der Übersetzung beteiligt gewesen sein → Septuaginta"]],
+  t:[["Hellenismus","Sprache und Gesetze der Hellenen in makedonischer Überformung bestimmten Kommunikation und Zusammenleben im östlichen Mittelmeerraum"],
+     ["Diadochenreiche","Nachfolgereiche"],
+     ["Ptolemäer, Seleukiden, Antigoniden","Machtbereiche nach Alexander (M3)"],
+     ["Alexandria","Museum und Bibliothek: entscheidend für die geistige Entwicklung der alten Welt"],
+     ["Septuaginta","Übersetzung des Tanach (der jüdischen Bibel) aus dem Hebräischen und Aramäischen in die griechische Sprache; lat. für siebzig"],
+     ["Papyrusmonopol","Monopol Ägyptens; trug zum Aufschwung der Buchherstellung bei"],
+     ["Fernhandel / Monsunwinde","die ptolemäischen Pharaonen wollten die arabischen Kaufleute im Handel mit Indien verdrängen; Einnahmen auch aus der Besteuerung des Oliven- und Getreidehandels"]],
+  q:[["Benennen","wichtige Kennzeichen des Hellenismus; dabei auf die Geschichte Alexandrias beziehen","S. 23, A2"]],
+  next:["zurück in der Zeit","Parallel zu Griechenland: Rom (Sage 753, wahrscheinlich um 800 v. Chr.)"] },
+
+{ id:"rom", lane:"r", row:0, s:-753, e:-510, short:"Rom: Anfänge",
+  period:"um 800 / 753 – 510 v. Chr.", title:"Rom: Gründung und Königszeit", ru:"Sage und Stadtgründung",
+  sum:"Gemäß einer Sage gründeten die ausgesetzten Königssöhne Romulus und Remus, die von einer Wölfin gesäugt und von einem Hirten aufgezogen wurden, am 21. April 753 v. Chr. die Stadt Rom. Das Römische Reich ging aus einer wahrscheinlich etruskischen Stadtgründung um 800 v. Chr. hervor. Die Stadt erstreckte sich über sieben Hügel am Unterlauf des Tibers; Zentrum war das Forum, der Markt mit den Tempeln der Gottheiten. Römische Geschichtsschreiber nannten sieben etruskische Könige, die bis 510 v. Chr. in Rom geherrscht haben sollen; neben ihnen bestimmte auch der Senat, der Altenrat, die Politik.",
+  cause:"Lage am Unterlauf des Tibers: wichtig für die Versorgung und die Entsorgung von Abfall.",
+  res:"Nach dem Sturz der Monarchie wurde Rom, vergleichbar mit Athen, eine vom Geburtsadel geführte Republik. Im selben Jahr muss Hippias Athen verlassen (514 + vier Jahre).",
+  places:["Rom"],
+  routes:[],
+  cap:"Rom: sieben Hügel am Unterlauf des Tibers.",
+  d:[[-753,"21. April 753 v. Chr.","Gründung Roms laut Sage"],
+     [-800,"um 800 v. Chr.","wahrscheinlich etruskische Stadtgründung"],
+     [-510,"bis 510 v. Chr.","sieben etruskische Könige"],
+     [-100,"1. Jh. v. Chr.","Rom hat wahrscheinlich schon mehr als 1 Mio. Einwohnerinnen und Einwohner"]],
+  p:[["Romulus und Remus","ausgesetzte Königssöhne der Sage"],
+     ["Etrusker","sieben etruskische Könige sollen in Rom geherrscht haben"],
+     ["Tarquinius (616–578 v. Chr.)","König; zu seiner Zeit gründeten die Phokäer Massilia (S. 15, M4)"]],
+  t:[["sieben Hügel","Palatin, Kapitol, Aventin, Caelius, Esquilin, Viminal, Quirinal"],
+     ["Tiber","Fluss; Tiberinsel, Marsfeld"],
+     ["Forum Romanum","Markt mit den Tempeln der Gottheiten, Zentrum der Stadt"],
+     ["Senat","Altenrat; in der Republik das politische Zentrum"],
+     ["Servianische Mauer","eingezeichnet in M1 (Schematische Darstellung der sieben Hügel Roms)"],
+     ["Kapitolinische Wölfin","Datierung strittig; Figuren der Knaben aus dem Mittelalter, die Wölfin vielleicht schon 5. Jh. v. Chr. (M2)"],
+     ["Aquädukte","Wasserleitungen; Entsorgung über ein Kanalnetz"],
+     ["Kaiserzeit","Ausbau durch neue Foren, Tempel, Wettkampfarenen (Circus Maximus, Kolosseum) und Paläste"]],
+  q:[["Diskutieren","den römischen Gründungsmythos vor dem Hintergrund Ihrer Kenntnisse der Biologie sowie der römischen Frühgeschichte","S. 25, A3"]],
+  next:["510 v. Chr.","Sturz der Monarchie → Res Publica"] },
+
+{ id:"respublica", lane:"r", row:0, s:-510, e:-287, short:"Res Publica",
+  period:"510–287 v. Chr.", title:"Die Res Publica", ru:"Patrizier, Plebejer und Ständekämpfe",
+  sum:"Nach dem Sturz der Monarchie wurde Rom eine vom Geburtsadel geführte Republik. Sie beruhte auf drei Säulen: Senat, Magistrat und Volksversammlung. Die Volksversammlung der landbesitzenden Bauern (Plebejer) und der patrizischen Großgrundbesitzer trat einmal im Jahr auf dem Marsfeld zusammen, stimmte über die Berichte der Magistrate und Gesetzesanträge ab, urteilte als oberste gerichtliche Berufungsinstanz und wählte für ein Jahr die Beamten der Magistrate. Patrizier oder Plebejer wurde man mit der Geburt.",
+  cause:"Die wenigen Adelsfamilien, die Patrizier, besaßen das meiste Land und bestimmten die Politik.",
+  res:"In den Ständekämpfen erlangten die Plebejer wesentliche Rechte und den Zugang zum Konsulat; so entstand die Nobilität als neue Adelsschicht. Auch Geschäftserfolg und Reichtum führten nun in die Oberschicht. Ein „homo novus“ blieb jedoch eine seltene Erscheinung.",
+  places:["Rom"],
+  routes:[],
+  cap:"Die Volksversammlung trat einmal im Jahr auf dem Marsfeld zusammen.",
+  d:[[-510,"510 v. Chr.","Sturz der Monarchie, Republik"],
+     [-494,"494 v. Chr.","Amt des Volkstribuns (der Legende nach)"],
+     [-471,"um 471 v. Chr.","concilium plebis gebildet"],
+     [-450,"um 450 v. Chr.","Zwölftafelgesetz: Rechtssprüche öffentlich einsehbar"],
+     [-445,"445 v. Chr.","Gleichstellung der Plebejer"],
+     [-367,"367 v. Chr.","Zugang der Plebejer zum Konsulat, dem neuen höchsten Amt"],
+     [-287,"287 v. Chr.","Beschlüsse des concilium plebis (plebiscita) auch für Patrizier verbindlich"],
+     [-63,"63 v. Chr.","Cicero wird Konsul (homo novus)"]],
+  p:[["Patrizier","lat. pater = Oberhaupt einer Familie; besaßen das meiste Land, stellten im Krieg die Reiterei"],
+     ["Plebejer","lat. plebs = Volk, Menge"],
+     ["Marcus Tullius Cicero (106–43 v. Chr.)","homo novus aus einer nichtsenatorischen Familie, 63 v. Chr. Konsul; brillanter Redner, Schriftsteller und Anwalt"],
+     ["Ronald Syme","Historiker; schrieb 1939 über den „homo novus“ (M4)"]],
+  t:[["Res Publica","Republik; drei Säulen: Senat, Magistrat, Volksversammlung"],
+     ["Senat","ca. 300 über 60-jährige Männer, die zuvor Magistraturen bekleidet haben müssen; von den Censoren vorgeschlagen"],
+     ["Magistrat","2 Censoren (Steuern), 2 Konsuln (Heer), 6 Prätoren (Rechtsprechung), 2 Ädilen (Tempelaufsicht), Quästoren (Staatskasse), 2 plebejische Ädilen (Ordnungspolizei)"],
+     ["Volkstribunen","10; Vetorecht gegen Beschlüsse des Magistrats und des Senats; zum Schutz der Plebejer"],
+     ["Diktator","in Krisenfällen auf sechs Monate bestellt"],
+     ["Comitia centuriata / Comitia tributa / Concilium plebis","nach Vermögen / nach Wohnbezirk / nur Plebejer"],
+     ["Ständekämpfe","Kämpfe, in denen die Plebejer wesentliche Rechte erlangten"],
+     ["Zwölftafelgesetz / conubium","Kodifikation des Rechts / Recht der Eheschließung mit den Patriziern"],
+     ["plebiscita","Beschlüsse des concilium plebis"],
+     ["Nobilität","lat. nobilitas = Amtsadel"],
+     ["homo novus","Mann ohne Vorfahren im Konsulat; konnte laut Syme meist nur bis zur Prätur aufsteigen"]],
+  schema:`<div class="tablewrap"><table><tr><th></th><th>Athen (Kleisthenes)</th><th>Rom (Res Publica)</th></tr>
+<tr><td>Volksversammlung</td><td>gleiches Stimmrecht aller Männer über 18</td><td>Comitia centuriata (nach Vermögen), Comitia tributa (nach Wohnbezirk), Concilium plebis</td></tr>
+<tr><td>Rat</td><td>Rat der 500 (Los)</td><td>Senat (ehemalige Magistrate)</td></tr>
+<tr><td>Ämter</td><td>ca. 1100 Ämter gelost; Strategen gewählt</td><td>Magistrat; Wahl für ein Jahr</td></tr>
+<tr><td>Führung</td><td>Isonomia</td><td>vom Geburtsadel geführte Republik</td></tr></table></div>`,
+  q:[["Erklären","die Entwicklung der Nobilität als neue Oberschicht in der römischen Republik anhand der Informationen auf Seite 24","S. 25, A1"]],
+  next:["parallel","Ab dem 5. Jh.: Konflikte mit italischen Stämmen → römische Expansion"] },
+
+{ id:"expansion", lane:"r", row:1, s:-500, e:-88, short:"Expansion",
+  period:"5. Jh. – 88 v. Chr.", title:"Die römische Expansion", ru:"Der Weg zum Imperium Romanum",
+  sum:"In den ersten Jahrhunderten nach seiner Gründung blieb Rom ein kleiner Stadtstaat an einem alten Handelsweg. Ab dem 5. Jh. geriet die junge Republik in Konflikt mit italischen Stämmen, die in die fruchtbaren Küstenebenen vordrangen. In jahrzehntelangen Kriegen besiegte das römische Bauernheer die umliegenden Städte der Etrusker. Einen Masterplan gab es wohl nicht. Rom machte die Besiegten zu Bundesgenossen, die Abgaben und Heeresfolge leisten mussten; innere Angelegenheiten konnten sie selbst regeln, sich aber nicht gegen Rom verbünden.",
+  cause:"Beistandsverträge; wirtschaftliche Motive (z. B. Landerwerb des senatorischen Adels); Streben nach persönlichem Ansehen und Macht; Aussicht auf Kriegsbeute und Sklaven. Von römischer Seite: eigenes Sicherheitsbedürfnis, Theorie vom „gerechten Krieg“ (bellum iustum).",
+  res:"Rom brachte in den folgenden Jahrhunderten den gesamten Mittelmeerraum unter seine Kontrolle. Um 100 v. Chr. geriet das System in eine Krise: Die Bundesgenossen forderten das römische Bürgerrecht und bekamen es nach dem Bundesgenossenkrieg (91–88 v. Chr.). Damit wurde die Grundlage des Imperium Romanum geschaffen.",
+  places:["Rom"],
+  routes:[],
+  cap:"Von Rom aus: zuerst Italien, in den folgenden Jahrhunderten der gesamte Mittelmeerraum.",
+  d:[[-500,"ab dem 5. Jh. v. Chr.","Konflikte mit italischen Stämmen; Kriege gegen die Städte der Etrusker"],
+     [-390,"frühes 4. Jh. v. Chr.","Plünderung Roms durch Kelten; später Begründung für die Eroberung keltischer Siedlungsgebiete Mittelitaliens und der Poebene"],
+     [-100,"um 100 v. Chr.","Krise des Systems: Bundesgenossen fordern das römische Bürgerrecht"],
+     [-91,"91–88 v. Chr.","Bundesgenossenkrieg → römisches Bürgerrecht für die Bundesgenossen"]],
+  p:[["Etrusker","ihre umliegenden Städte wurden vom römischen Bauernheer besiegt"],
+     ["Kelten","plünderten Rom im frühen 4. Jh. v. Chr."],
+     ["Bundesgenossen","besiegte Völker im Bündnis mit Rom"]],
+  t:[["bellum iustum","„gerechter Krieg“: Kriege seien nur zur Verteidigung gerechtfertigt, allerdings in einem sehr weiten Sinn"],
+     ["Bundesgenossen","leisteten Abgaben und Heeresfolge; durften sich nicht gegen Rom verbünden"],
+     ["Bundesgenossenkrieg","91–88 v. Chr."],
+     ["römisches Bürgerrecht","Forderung der Bundesgenossen"],
+     ["Imperium Romanum","Römisches Reich"]],
+  q:[["Beschreiben","die Entstehung des Römischen Reiches auf der italienischen Halbinsel; mit dem Atlas geografisch verorten","S. 25, A2"]],
+  next:null }
+];
+
+const laneName = {g:"Griechenland", m:"Makedonien / Hellenismus", r:"Rom"};
+const laneY = {g:24, m:92, r:160};
+const tx = y => y < -800 ? 100 + (y+1200)/400*70 : 170 + (y+800)/800*810;
+const NS = "http://www.w3.org/2000/svg";
+const el = (n,a={},p) => { const e=document.createElementNS(NS,n); for(const k in a) e.setAttribute(k,a[k]); if(p) p.appendChild(e); return e; };
+const col = l => `var(--${l})`;
+
+/* River */
+const river = document.getElementById("river");
+["g","m","r"].forEach(l=>{
+  el("rect",{x:0,y:laneY[l]-6,width:1000,height:60,fill:col(l),opacity:.06,rx:6},river);
+  const t=el("text",{x:8,y:laneY[l]+30,class:"lane-label"},river); t.textContent=laneName[l].split(" / ")[0];
+});
+const ax = el("g",{class:"axis"},river);
+el("line",{x1:100,x2:985,y1:218,y2:218,stroke:"var(--line)"},ax);
+[-1200,-800,-700,-600,-500,-400,-300,-200,-100,0].forEach(y=>{
+  el("line",{x1:tx(y),x2:tx(y),y1:214,y2:222,stroke:"var(--muted)"},ax);
+  const t=el("text",{x:tx(y),y:234,"text-anchor":"middle"},ax); t.textContent = y===0?"0":(-y);
+});
+const brk=el("text",{x:(tx(-1000)),y:212,"text-anchor":"middle"},ax); brk.textContent="gestaucht";
+el("line",{x1:tx(-510),x2:tx(-510),y1:14,y2:214,stroke:"var(--ink)","stroke-dasharray":"3 4",opacity:.5},river);
+const t510=el("text",{x:tx(-510)+4,y:12,class:"lane-label"},river); t510.textContent="510";
+const bars = F.map((f,i)=>{
+  const g=el("g",{class:"bar",tabindex:0,role:"button","aria-label":f.title+", "+f.period},river);
+  const y=laneY[f.lane]+f.row*24, x1=tx(f.s), w=Math.max(8,tx(f.e)-x1);
+  el("rect",{x:x1,y,width:w,height:18,rx:4,fill:col(f.lane)},g);
+  const fits = w > f.short.length*7+12;
+  const t=el("text",{x:fits?x1+6:x1+w+5,y:y+13},g); t.textContent=f.short;
+  if(fits) t.setAttribute("fill","var(--paper)"), t.style.fill="var(--paper)";
+  g.addEventListener("click",()=>show(i));
+  g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();show(i)}});
+  return g;
+});
+
+/* Map */
+const map = document.getElementById("map");
+const path = pts => "M"+pts.map(p=>xy(p).join(",")).join("L")+"Z";
+SEA.forEach(s=>el("path",{d:path(s),fill:"var(--sea)",stroke:"var(--coast)","stroke-width":.6,"vector-effect":"non-scaling-stroke"},map));
+ISLANDS.forEach(s=>el("path",{d:path(s),fill:"var(--land)",stroke:"var(--coast)","stroke-width":.6,"vector-effect":"non-scaling-stroke"},map));
+const defs=el("defs",{},map);
+["g","m","r"].forEach(l=>{
+  const mk=el("marker",{id:"ah-"+l,viewBox:"0 0 10 10",refX:8,refY:5,markerWidth:6,markerHeight:6,orient:"auto-start-reverse"},defs);
+  el("path",{d:"M0,0L10,5L0,10Z",fill:col(l)},mk);
+});
+const routeLayer = el("g",{},map);
+const placeEls = {};
+for(const n in P){
+  const [x,y]=xy(P[n]);
+  const g=el("g",{class:"place off"},map);
+  const c=el("circle",{cx:x,cy:y,r:2,fill:"var(--ink)"},g);
+  const t=el("text",{x:x+3,y:y-3},g); t.textContent=n;
+  placeEls[n]={g,c,t,x,y};
+}
+let vb=[0,0,800,230], anim;
+function setVB(v){
+  vb=v; map.setAttribute("viewBox",v.join(" "));
+  const u=v[2]/800;
+  for(const n in placeEls){const p=placeEls[n];
+    p.c.setAttribute("r",(p.g.classList.contains("off")?3:5)*u);
+    p.t.setAttribute("font-size",15*u); p.t.setAttribute("stroke-width",3*u);
+    p.t.setAttribute("x",p.x+6*u); p.t.setAttribute("y",p.y-6*u);}
+  routeLayer.querySelectorAll("path").forEach(r=>r.setAttribute("stroke-width",2.5*u));
+}
+function target(f){
+  const pts=f.places.map(n=>[placeEls[n].x,placeEls[n].y]);
+  let x0=Math.min(...pts.map(p=>p[0])),x1=Math.max(...pts.map(p=>p[0])),
+      y0=Math.min(...pts.map(p=>p[1])),y1=Math.max(...pts.map(p=>p[1]));
+  let w=Math.max(x1-x0+70,150), h=Math.max(y1-y0+60,103);
+  const cx=(x0+x1)/2, cy=(y0+y1)/2, ar=16/11;
+  if(w/h>ar) h=w/ar; else w=h*ar;
+  return [cx-w/2,cy-h/2,w,h];
+}
+function flyTo(t){
+  cancelAnimationFrame(anim);
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches){setVB(t);return}
+  const s=vb.slice(), t0=performance.now(), D=800;
+  const step=now=>{let k=Math.min(1,(now-t0)/D); k=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2;
+    setVB(s.map((v,i)=>v+(t[i]-v)*k)); if(k<1) anim=requestAnimationFrame(step);};
+  anim=requestAnimationFrame(step);
+}
+function drawRoutes(f){
+  routeLayer.innerHTML="";
+  f.routes.forEach(([a,b])=>{
+    const A=placeEls[a],B=placeEls[b], mx=(A.x+B.x)/2, my=(A.y+B.y)/2;
+    const dx=B.x-A.x, dy=B.y-A.y, len=Math.hypot(dx,dy)||1;
+    const cx=mx-dy/len*len*.18, cy=my+dx/len*len*.18;
+    el("path",{d:`M${A.x},${A.y}Q${cx},${cy} ${B.x},${B.y}`,fill:"none",stroke:col(f.lane),"stroke-linecap":"round","marker-end":`url(#ah-${f.lane})`,opacity:.9},routeLayer);
+  });
+}
+
+/* Frame */
+const frame=document.getElementById("frame");
+let cur=0;
+const esc=s=>s;
+function show(i){
+  cur=i; const f=F[i];
+  bars.forEach((b,j)=>{b.classList.toggle("on",j===i);b.classList.toggle("dim",j!==i)});
+  for(const n in placeEls) placeEls[n].g.classList.toggle("off",!f.places.includes(n));
+  drawRoutes(f); flyTo(target(f));
+  document.getElementById("mapcap").textContent=f.cap;
+  frame.style.setProperty("--lane",col(f.lane));
+  const dl=(rows,cls)=>`<dl class="${cls}">${rows.map(r=>`<dt>${r[r.length-2]}</dt><dd><span class="hide" tabindex="0">${r[r.length-1]}</span></dd>`).join("")}</dl>`;
+  frame.innerHTML=`
+  <div class="fhead"><div><div class="period">${f.period}</div><h2>${f.title}</h2><div class="ru">${f.ru}</div></div>
+  <div><div class="nav"><button id="prev" aria-label="Vorherige Station" ${i===0?"disabled":""}>←</button><button id="nxt" aria-label="Nächste Station" ${i===F.length-1?"disabled":""}>→</button></div><div class="count">Station ${i+1} von ${F.length}</div></div></div>
+  <p class="qnote">Abfragemodus: Erst selbst erinnern, dann auf das graue Feld tippen.</p>
+  <p class="summary">${f.sum}</p>
+  <div class="cause"><div><b>Ursachen / Ausgangslage</b>${f.cause}</div><div class="arr" aria-hidden="true">→</div><div><b>Folgen</b>${f.res}</div></div>
+  <h3>Daten</h3>${dl(f.d,"dates")}
+  <h3>Personen</h3>${dl(f.p,"terms")}
+  <h3>Begriffe</h3>${dl(f.t,"terms")}
+  ${f.schema?`<h3>Schema</h3>${f.schema}`:""}
+  ${f.q.length?`<h3>Arbeitsaufträge aus dem Buch</h3><ul class="qs">${f.q.map(q=>`<li><span class="op">${q[0]}</span>: ${q[1]} <span class="src">(${q[2]})</span></li>`).join("")}</ul>`:""}
+  ${f.next?`<div class="next"><div class="gap">${f.next[0]}</div><div>${f.next[1]}</div><button id="go">Weiter</button></div>`:`<div class="next"><div>Letzte Station. Jetzt im Abfragemodus noch einmal von vorne.</div><button id="go">Von vorne</button></div>`}`;
+  frame.querySelector("#prev").onclick=()=>show(i-1);
+  frame.querySelector("#nxt").onclick=()=>show(i+1);
+  frame.querySelector("#go").onclick=()=>{show(f.next?i+1:0); frame.scrollIntoView({behavior:"smooth",block:"start"})};
+  frame.querySelectorAll(".hide").forEach(h=>{
+    const tg=()=>{ if(document.body.classList.contains("quiz")) h.classList.toggle("open") };
+    h.onclick=tg; h.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tg()}};
+  });
+}
+document.addEventListener("keydown",e=>{
+  if(e.target.closest&&e.target.closest("input,textarea")) return;
+  if(e.key==="ArrowRight"&&cur<F.length-1) show(cur+1);
+  if(e.key==="ArrowLeft"&&cur>0) show(cur-1);
+});
+const qb=document.getElementById("quizBtn");
+qb.onclick=()=>{const on=document.body.classList.toggle("quiz"); qb.setAttribute("aria-pressed",on);
+  document.querySelectorAll(".hide.open").forEach(h=>h.classList.remove("open"))};
+
+/* All dates */
+const all=[]; F.forEach(f=>f.d.forEach(d=>all.push({y:d[0],l:d[1],t:d[2],lane:f.lane})));
+all.sort((a,b)=>a.y-b.y);
+document.getElementById("alldates").innerHTML=all.map(a=>`<dt><span class="dot" style="background:${col(a.lane)}"></span>${a.l}</dt><dd><span class="hide" tabindex="0">${a.t}</span></dd>`).join("");
+document.querySelectorAll("#alldates .hide").forEach(h=>{const tg=()=>{if(document.body.classList.contains("quiz"))h.classList.toggle("open")};h.onclick=tg;h.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tg()}}});
+
+setVB(vb); show(0);
+</script>
+</body>
+</html>
